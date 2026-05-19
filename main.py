@@ -37,21 +37,21 @@ def to_superscript(num: str):
 def format_expr(expr):
     s = str(expr)
 
-    # 1) Hochzahlen
-    s = re.sub(r"\*\*(-?\d+)", lambda m: to_superscript(m.group(1)), s)
+    # Wurzeln
+    s = s.replace("sqrt", "√")
 
-    # 2) Wurzeln
-    s = s.replace("**0.5", "√")
-    s = s.replace("**0.25", "⁴√")
+    # Potenzen: x**2 → x²
+    s = s.replace("**2", "<sup>2</sup>")
+    s = s.replace("**3", "<sup>3</sup>")
+    s = s.replace("**4", "<sup>4</sup>")
 
-    # 3) 3*x → 3x
-    s = re.sub(r"(\d)\*x", r"\1x", s)
+    # x**x → xˣ (Hochstellung)
+    s = s.replace("**x", "<sup>x</sup>")
 
-    # 4) 2*3 → 2·3
-    s = re.sub(r"(\d)\*(\d)", r"\1·\2", s)
+    # x*y → x·y
+    s = s.replace("*", "·")
 
     return s
-
 # 👉 Mathe-Eingabe clean machen
 transformations = (
     standard_transformations +
@@ -101,7 +101,7 @@ def new_task():
         current_function = random.choice(easy_tasks)
     else:
         current_function = random.choice(hard_tasks)
-    correct_answer = diff(current_function, x).factor()
+    correct_answer = simplify(diff(current_function, x))
 
 
 new_task()
@@ -113,6 +113,7 @@ def home():
     <html>
     <head>
         <title>Mathe Trainer</title>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
         <!-- 👉 schöne Mathe-/Schulschrift -->
         <link href="https://fonts.googleapis.com/css2?family=Computer+Modern+Serif&display=swap" rel="stylesheet">
@@ -226,7 +227,8 @@ def home():
             async function loadTask() {
                 let res = await fetch("/task");
                 let data = await res.json();
-                document.getElementById("task").innerText = data.task;
+                document.getElementById("task").innerHTML = "\\(" + data.task + "\\)";
+                MathJax.typeset();
             }
 
             async function check() {
@@ -295,7 +297,8 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
 
 @app.get("/task")
 def task():
-    return {"task": format_expr(current_function)}
+    import sympy as sp
+    return {"task": sp.latex(current_function)}
 
 
 @app.get("/next")
@@ -315,18 +318,16 @@ def set_difficulty(level: str):
 
 @app.get("/check")
 def check(answer: str):
-
     try:
         user = parse_expr(answer, transformations=transformations)
 
-        if simplify(user - correct_answer) == 0:
+        if simplify(user - correct_answer).equals(0):
             return {"correct": True, "feedback": "✅ Richtig!"}
         else:
             return {
                 "correct": False,
                 "feedback": "❌ Falsch. Lösung: " + format_expr(correct_answer)
             }
-
     except:
         return {
             "correct": False,
