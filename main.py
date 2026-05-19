@@ -147,9 +147,11 @@ def home():
     """
 
 
+
 @app.get("/task")
 def task():
-    return {"task": str(current_function)}
+    pretty = str(current_function).replace("**", "^")
+    return {"task": pretty}
 
 
 @app.get("/next")
