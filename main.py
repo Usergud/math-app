@@ -101,7 +101,7 @@ def new_task():
         current_function = random.choice(easy_tasks)
     else:
         current_function = random.choice(hard_tasks)
-    correct_answer = diff(current_function, x)
+    correct_answer = simplify(diff(current_function, x).expand())
 
 
 new_task()
