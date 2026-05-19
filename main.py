@@ -215,12 +215,11 @@ def home():
                 document.getElementById("result").innerText = "";
                 answered = false;
                 document.getElementById("answer").focus();
+            }
             
             async function setDifficulty(level) {
 
                 await fetch("/difficulty?level=" + level);
-
-                await loadTask();
 
                 document.getElementById("answer").value = "";
                 document.getElementById("result").innerText = "";
@@ -229,7 +228,9 @@ def home():
                     document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Einfach";
                 } else {
                     document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Schwer";
-            }
+                }
+
+                await loadTask();
 }
 
             let answered = false;
