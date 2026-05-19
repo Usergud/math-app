@@ -145,9 +145,32 @@ def home():
                 await loadTask();
                 document.getElementById("answer").value = "";
                 document.getElementById("result").innerText = "";
+                answered = false;
+                document.getElementById("answer").focus();
             }
 
             loadTask();
+            let answered = false;
+
+document.getElementById("answer").addEventListener("keydown", async function(event) {
+
+    if (event.key === "Enter") {
+
+        if (!answered) {
+
+            await check();
+            answered = true;
+
+        } else {
+
+            await nextTask();
+            answered = false;
+
+        }
+
+    }
+
+});
 
         </script>
 
