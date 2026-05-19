@@ -32,20 +32,30 @@ transformations = (
 
 # 👉 Aufgaben
 
+# 🟢 EASY (klassische Schulableitungen)
 easy_tasks = [
     x**2 + 3*x,
-    x**3 - 2*x,
-    4*x**2 + x,
+    2*x**3 - x,
+    4*x**2 + 5*x,
     x**4 - x**2,
-    5*x**3 + 2*x
+    6*x + 3,
+    7*x**2,
+    x**3 + 2*x + 1,
+    5*x**4
 ]
 
+# 🔴 HARD (Mix aus Kettenregel, Produktregel, Quotientenregel, Wurzeln, Brüche, trig)
 hard_tasks = [
-    x**2 / 2 + 3*x,
-    x**3 - 2/x,
-    4*x**2 + x**0.5,
-    x**4 - x**2 + 1/x,
-    5*x**3 + 2*x - x**0.5
+    (x**2 + 1)*(x**3 - x),                  # Produktregel
+    (x**3 + 2*x)/(x**2 + 1),                # Quotientenregel
+    (x**2 + 1)**3,                          # Kettenregel
+    (x**2 + x)**5,                          # starke Kettenregel
+    x* (x**2 + 3)**4,                       # Produkt + Kette
+    (x + 1)/(x**3 + 1),                     # Quotient
+    x**x,                                    # exponentielle Funktion
+    x**2 * (x + 1)**2,                      # gemischt
+    (x**2 + 1)**0.5,                        # Wurzel + Kette
+    (1 + x**2)**(-1),                      # negative Potenz
 ]
 
 difficulty = "easy"
@@ -84,13 +94,15 @@ def home():
                 margin: 0;
                 display: flex;
             }
-            #sidebar {
+           #sidebar {
                 width: 220px;
-                background-color: #e9ecf7;
+                background: linear-gradient(180deg, #f7f9ff, #b8c6ff);
                 height: 100vh;
                 padding: 20px;
                 box-sizing: border-box;
                 text-align: left;
+                backdrop-filter: blur(10px);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
             #sidebar h2 {
