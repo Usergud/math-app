@@ -105,6 +105,11 @@ def home():
                 box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
+            #difficultyDisplay {
+                font-size: 18px;
+                margin-top: 10px;
+                color: #555;
+}
             #sidebar h2 {
                 margin-top: 0;
 }
@@ -172,6 +177,7 @@ def home():
     <div id="main">
 
         <h1>📘 Mathe Trainer</h1>
+        <div id="difficultyDisplay">Schwierigkeit: Einfach</div>
 
         <p>Leite ab:</p>
         <div id="task"></div>
@@ -209,7 +215,7 @@ def home():
                 document.getElementById("result").innerText = "";
                 answered = false;
                 document.getElementById("answer").focus();
-            }
+            
             async function setDifficulty(level) {
 
                 await fetch("/difficulty?level=" + level);
@@ -219,6 +225,11 @@ def home():
                 document.getElementById("answer").value = "";
                 document.getElementById("result").innerText = "";
 
+                if (level === "easy") {
+                    document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Einfach";
+                } else {
+                    document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Schwer";
+            }
 }
 
             let answered = false;
