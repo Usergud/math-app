@@ -146,13 +146,10 @@ def home():
     </html>
     """
 
-
 @app.get("/task")
 def task():
     pretty = str(current_function).replace("**", "^")
     return {"task": pretty}
-
-
 @app.get("/next")
 def next_task():
     new_task()
