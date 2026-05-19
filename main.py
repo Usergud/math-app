@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from sympy import symbols, diff, simplify
+import sympy as sp
 from sympy.parsing.sympy_parser import (
     parse_expr,
     standard_transformations,
@@ -11,7 +11,7 @@ import random
 
 app = FastAPI()
 
-x = symbols('x')
+x = sp.symbols('x')
 
 from sympy.printing.str import StrPrinter
 
@@ -84,7 +84,7 @@ hard_tasks = [
     (x + 1)/(x**3 + 1),                     # Quotient
     x**x,                                    # exponentielle Funktion
     x**2 * (x + 1)**2,                      # gemischt
-    (x**2 + 1)**0.5,                        # Wurzel + Kette
+    sp.sqrt(x**2 + 1),                        # Wurzel + Kette
     (1 + x**2)**(-1),                      # negative Potenz
 ]
 
@@ -101,7 +101,7 @@ def new_task():
         current_function = random.choice(easy_tasks)
     else:
         current_function = random.choice(hard_tasks)
-    correct_answer = simplify(diff(current_function, x))
+    correct_answer = sp.simplify(sp.diff(current_function, x))
 
 
 new_task()
@@ -249,7 +249,7 @@ def home():
                 await fetch("/next");
                 await loadTask();
                 document.getElementById("answer").value = "";
-                document.getElementById("result").innerText = "";
+                document.getElementById("result").innerHTML = "";
                 answered = false;
                 document.getElementById("answer").focus();
             }
@@ -326,10 +326,10 @@ def check(answer: str):
     try:
         user = parse_expr(answer, transformations=transformations)
 
-        if simplify(user - correct_answer).equals(0):
+        if sp.simplify(user - correct_answer).equals(0):
             return {"correct": True, "feedback": "✅ Richtig!"}
         else:
-            import sympy as sp
+
 
             return {
                 "correct": False,
