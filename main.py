@@ -147,7 +147,7 @@ def home():
     """
 @app.get("/task")
 def task():
-    return {"task": str(current_function)}
+    return {"task": str(current_function).replace("*", "")}
 @app.get("/next")
 def next_task():
     new_task()
