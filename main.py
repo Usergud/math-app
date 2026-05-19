@@ -13,8 +13,14 @@ app = FastAPI()
 
 x = symbols('x')
 
+from sympy.printing.str import StrPrinter
+
+class MyPrinter(StrPrinter):
+    def _print_Mul(self, expr):
+        return "".join(self._print(arg) for arg in expr.args)
+
 def format_expr(expr):
-    return str(expr).replace("*", "").replace("**", "^")
+    return MyPrinter().doprint(expr).replace("**", "^")
 
 # 👉 Mathe-Eingabe clean machen
 transformations = (
