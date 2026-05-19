@@ -13,6 +13,9 @@ app = FastAPI()
 
 x = symbols('x')
 
+def format_expr(expr):
+    return str(expr).replace("*", "").replace("**", "^")
+
 # 👉 Mathe-Eingabe clean machen
 transformations = (
     standard_transformations +
@@ -147,11 +150,9 @@ def home():
     """
 
 
-
 @app.get("/task")
 def task():
-    pretty = str(current_function).replace("**", "^")
-    return {"task": pretty}
+    return {"task": format_expr(current_function)}
 
 
 @app.get("/next")
@@ -171,7 +172,7 @@ def check(answer: str):
         else:
             return {
                 "correct": False,
-                "feedback": "❌ Falsch. Lösung: " + str(correct_answer)
+                "feedback": "❌ Falsch. Lösung: " + format_expr(correct_answer)
             }
 
     except:
