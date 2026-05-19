@@ -227,8 +227,10 @@ def home():
             async function loadTask() {
                 let res = await fetch("/task");
                 let data = await res.json();
-                document.getElementById("task").innerHTML = "\\[" + data.task + "\\]";
-                MathJax.typeset();
+                document.getElementById("task").innerHTML = "$$" + data.task + "$$";
+
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
             }
 
             async function check() {
@@ -237,7 +239,10 @@ def home():
                 let res = await fetch("/check?answer=" + encodeURIComponent(ans));
                 let data = await res.json();
 
-                document.getElementById("result").innerText = data.feedback;
+                document.getElementById("result").innerHTML = data.feedback;
+
+                MathJax.typesetClear();
+                MathJax.typesetPromise();
             }
 
             async function nextTask() {
@@ -254,7 +259,7 @@ def home():
                 await fetch("/difficulty?level=" + level);
 
                 document.getElementById("answer").value = "";
-                document.getElementById("result").innerText = "";
+                document.getElementById("result").innerHTML = "";
 
                 if (level === "easy") {
                     document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Einfach";
