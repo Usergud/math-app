@@ -15,12 +15,42 @@ x = symbols('x')
 
 from sympy.printing.str import StrPrinter
 
-class MyPrinter(StrPrinter):
-    def _print_Mul(self, expr):
-        return "".join(self._print(arg) for arg in expr.args)
+import re
+
+superscripts = {
+    "0": "⁰",
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+    "-": "⁻"
+}
+
+def to_superscript(num: str):
+    return "".join(superscripts.get(c, c) for c in num)
 
 def format_expr(expr):
-    return MyPrinter().doprint(expr).replace("**", "^")
+    s = str(expr)
+
+    # 1) Hochzahlen
+    s = re.sub(r"\*\*(-?\d+)", lambda m: to_superscript(m.group(1)), s)
+
+    # 2) Wurzeln
+    s = s.replace("**0.5", "√")
+    s = s.replace("**0.25", "⁴√")
+
+    # 3) 3*x → 3x
+    s = re.sub(r"(\d)\*x", r"\1x", s)
+
+    # 4) 2*3 → 2·3
+    s = re.sub(r"(\d)\*(\d)", r"\1·\2", s)
+
+    return s
 
 # 👉 Mathe-Eingabe clean machen
 transformations = (
