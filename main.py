@@ -29,7 +29,10 @@ transformations = (
 )
 
 # 👉 Aufgaben
-aufgaben = [
+
+# 👉 Aufgaben
+
+easy_tasks = [
     x**2 + 3*x,
     x**3 - 2*x,
     4*x**2 + x,
@@ -37,13 +40,27 @@ aufgaben = [
     5*x**3 + 2*x
 ]
 
+hard_tasks = [
+    x**2 / 2 + 3*x,
+    x**3 - 2/x,
+    4*x**2 + x**0.5,
+    x**4 - x**2 + 1/x,
+    5*x**3 + 2*x - x**0.5
+]
+
+difficulty = "easy"
+
+
 current_function = None
 correct_answer = None
 
 
 def new_task():
     global current_function, correct_answer
-    current_function = random.choice(aufgaben)
+    if difficulty == "easy":
+        current_function = random.choice(easy_tasks)
+    else:
+        current_function = random.choice(hard_tasks)
     correct_answer = diff(current_function, x)
 
 
@@ -64,9 +81,32 @@ def home():
             body {
                 font-family: 'Computer Modern Serif', serif;
                 background-color: #f7f7fb;
+                margin: 0;
+                display: flex;
+            }
+            #sidebar {
+                width: 220px;
+                background-color: #e9ecf7;
+                height: 100vh;
+                padding: 20px;
+                box-sizing: border-box;
+                text-align: left;
+}
+
+            #sidebar h2 {
+                margin-top: 0;
+}
+
+            #sidebar button {
+                width: 100%;
+                margin-top: 10px;
+}
+
+            #main {
+                flex: 1;
                 text-align: center;
                 padding: 40px;
-            }
+}
 
             h1 {
                 font-size: 40px;
@@ -106,8 +146,18 @@ def home():
             }
         </style>
     </head>
-
+    
     <body>
+        <div id="sidebar">
+
+    <h2>Schwierigkeit</h2>
+
+    <button onclick="setDifficulty('easy')">Einfach</button>
+    <button onclick="setDifficulty('hard')">Schwer</button>
+
+    </div>
+
+    <div id="main">
 
         <h1>📘 Mathe Trainer</h1>
 
@@ -148,9 +198,19 @@ def home():
                 answered = false;
                 document.getElementById("answer").focus();
             }
+            async function setDifficulty(level) {
 
-            loadTask();
+                await fetch("/difficulty?level=" + level);
+
+                await loadTask();
+
+                document.getElementById("answer").value = "";
+                document.getElementById("result").innerText = "";
+
+}
+
             let answered = false;
+            loadTask();
 
 document.getElementById("answer").addEventListener("keydown", async function(event) {
 
@@ -173,7 +233,7 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
 });
 
         </script>
-
+    </div> <!-- closes main -->
     </body>
     </html>
     """
@@ -187,6 +247,15 @@ def task():
 @app.get("/next")
 def next_task():
     new_task()
+    return {"ok": True}
+@app.get("/difficulty")
+def set_difficulty(level: str):
+
+    global difficulty
+
+    difficulty = level
+    new_task()
+
     return {"ok": True}
 
 
