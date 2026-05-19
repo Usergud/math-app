@@ -227,7 +227,7 @@ def home():
             async function loadTask() {
                 let res = await fetch("/task");
                 let data = await res.json();
-                document.getElementById("task").innerHTML = "\\(" + data.task + "\\)";
+                document.getElementById("task").innerHTML = "\\[" + data.task + "\\]";
                 MathJax.typeset();
             }
 
@@ -324,9 +324,11 @@ def check(answer: str):
         if simplify(user - correct_answer).equals(0):
             return {"correct": True, "feedback": "✅ Richtig!"}
         else:
+            import sympy as sp
+
             return {
                 "correct": False,
-                "feedback": "❌ Falsch. Lösung: " + format_expr(correct_answer)
+                "feedback": "❌ Falsch. Lösung: \\(" + sp.latex(correct_answer) + "\\)"
             }
     except:
         return {
