@@ -504,7 +504,7 @@ function toPretty(val) {
 @app.get("/task")
 def task():
     import sympy as sp
-    return {"task": sp.latex(current_function)}
+    return {"task": sp.latex(current_function, symbol_names={sp.pi: r"\pi"})}
 
 
 @app.get("/next")
