@@ -281,9 +281,44 @@ def home():
         <p>Leite ab:</p>
         <div id="task"></div>
 
-        <input id="answer" placeholder="z.B. 2x+3">
+        <input id="answer" readonly placeholder="Tippe mit Buttons..." style="width: 300px;">
 
         <br>
+        
+        <div id="mathpad">
+
+    <button onclick="add('x')">x</button>
+    <button onclick="add('1')">1</button>
+    <button onclick="add('2')">2</button>
+    <button onclick="add('3')">3</button>
+    <button onclick="add('4')">4</button>
+    <button onclick="add('5')">5</button>
+    <button onclick="add('6')">6</button>
+    <button onclick="add('7')">7</button>
+    <button onclick="add('8')">8</button>
+    <button onclick="add('9')">9</button>
+    <button onclick="add('0')">0</button>
+
+    <br><br>
+
+    <button onclick="add('+')">+</button>
+    <button onclick="add('-')">-</button>
+    <button onclick="add('*')">·</button>
+    <button onclick="add('/')">/</button>
+    <button onclick="add('^')">^</button>
+
+    <br><br>
+
+    <button onclick="add('sin(')">sin</button>
+    <button onclick="add('cos(')">cos</button>
+    <button onclick="add('exp(')">e^x</button>
+    <button onclick="add('sqrt(')">√</button>
+
+    <br><br>
+
+    <button onclick="clearInput()">⌫ löschen</button>
+
+</div>
 
         <button onclick="check()">Prüfen</button>
         <button onclick="nextTask()">Nächste Aufgabe</button>
@@ -359,8 +394,14 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
     }
 
 });
+    function add(val) {
+        document.getElementById("answer").value += val;
+}
 
-        </script>
+    function clearInput() {
+        document.getElementById("answer").value = "";
+}
+    </script>
     </div> <!-- closes main -->
     </body>
     </html>
@@ -448,7 +489,6 @@ def check(answer: str):
                 "feedback": "⚠ Schreib z.B. 2x+3"
             }
 
-        # diff verbieten
         low = raw.lower()
         if "diff" in low or "derivative" in low:
             return {
@@ -476,23 +516,26 @@ def check(answer: str):
         )
 
         correct = sp.simplify(correct_answer)
+        user_s = sp.simplify(user)
 
-        # mathematisch falsch
-        if not same_math(user, correct):
+        # 1) mathematisch falsch
+        if not same_math(user_s, correct):
             return {
                 "correct": False,
                 "feedback": "❌ Falsch. Lösung: \\(" + sp.latex(correct) + "\\)"
             }
 
-        # mathematisch richtig, aber noch nicht in einer sauberen Standardform
-        for form in accepted_forms(correct):
-            if user == form:
-                return {"correct": True, "feedback": "✅ Richtig!"}
+        # 2) mathematisch richtig, aber noch nicht in einer einfachen Form
+        preferred = sp.simplify(correct)
 
-        return {
-            "correct": False,
-            "feedback": "⚠ Richtig, aber bitte weiter vereinfachen!"
-        }
+        if user_s != preferred and str(user_s) != str(preferred):
+            return {
+                "correct": False,
+                "feedback": "⚠ Richtig, aber bitte weiter vereinfachen!"
+            }
+
+        # 3) gut genug
+        return {"correct": True, "feedback": "✅ Richtig!"}
 
     except Exception:
         return {
