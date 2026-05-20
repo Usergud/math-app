@@ -281,43 +281,56 @@ def home():
         <p>Leite ab:</p>
         <div id="task"></div>
 
-        <input id="answer" readonly placeholder="Tippe mit Buttons..." style="width: 300px;">
+        <input id="answer" placeholder="Tippe oder klicke Buttons..." style="width: 340px;">
 
         <br>
         
         <div id="mathpad">
 
-    <button onclick="add('x')">x</button>
-    <button onclick="add('1')">1</button>
-    <button onclick="add('2')">2</button>
-    <button onclick="add('3')">3</button>
-    <button onclick="add('4')">4</button>
-    <button onclick="add('5')">5</button>
-    <button onclick="add('6')">6</button>
-    <button onclick="add('7')">7</button>
-    <button onclick="add('8')">8</button>
-    <button onclick="add('9')">9</button>
-    <button onclick="add('0')">0</button>
-
-    <br><br>
-
-    <button onclick="add('+')">+</button>
-    <button onclick="add('-')">-</button>
-    <button onclick="add('*')">·</button>
-    <button onclick="add('/')">/</button>
-    <button onclick="add('^')">^</button>
-
-    <br><br>
-
-    <button onclick="add('sin(')">sin</button>
-    <button onclick="add('cos(')">cos</button>
-    <button onclick="add('exp(')">e^x</button>
-    <button onclick="add('sqrt(')">√</button>
-
-    <br><br>
-
-    <button onclick="clearInput()">⌫ löschen</button>
-
+<table id="mathpad_table" style="margin: 0 auto; border-collapse: separate; border-spacing: 8px;">
+    <tr>
+        <td><button type="button" onclick="add('7')">7</button></td>
+        <td><button type="button" onclick="add('8')">8</button></td>
+        <td><button type="button" onclick="add('9')">9</button></td>
+        <td><button type="button" onclick="add('/')">/</button></td>
+        <td><button type="button" onclick="add('sqrt(')">√</button></td>
+    </tr>
+    <tr>
+        <td><button type="button" onclick="add('4')">4</button></td>
+        <td><button type="button" onclick="add('5')">5</button></td>
+        <td><button type="button" onclick="add('6')">6</button></td>
+        <td><button type="button" onclick="add('*')">·</button></td>
+        <td><button type="button" onclick="add('^')">^</button></td>
+    </tr>
+    <tr>
+        <td><button type="button" onclick="add('1')">1</button></td>
+        <td><button type="button" onclick="add('2')">2</button></td>
+        <td><button type="button" onclick="add('3')">3</button></td>
+        <td><button type="button" onclick="add('-')">-</button></td>
+        <td><button type="button" onclick="add('(')">(</button></td>
+    </tr>
+    <tr>
+        <td><button type="button" onclick="add('0')">0</button></td>
+        <td><button type="button" onclick="add('x')">x</button></td>
+        <td><button type="button" onclick="add('+')">+</button></td>
+        <td><button type="button" onclick="add(')')">)</button></td>
+        <td><button type="button" onclick="clearInput()">⌫ löschen</button></td>
+    </tr>
+    <tr>
+        <td><button type="button" onclick="add('sin(')">sin</button></td>
+        <td><button type="button" onclick="add('cos(')">cos</button></td>
+        <td><button type="button" onclick="add('tan(')">tan</button></td>
+        <td><button type="button" onclick="add('log(')">log</button></td>
+        <td><button type="button" onclick="add('ln(')">ln</button></td>
+    </tr>
+    <tr>
+        <td><button type="button" onclick="add('exp(')">e^x</button></td>
+        <td><button type="button" onclick="add('pi')">π</button></td>
+        <td><button type="button" onclick="add('e')">e</button></td>
+        <td><button type="button" onclick="add('**')">**</button></td>
+        <td><button type="button" onclick="add('Abs(')">|x|</button></td>
+    </tr>
+</table>
 </div>
 
         <button onclick="check()">Prüfen</button>
@@ -379,27 +392,21 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
 
     if (event.key === "Enter") {
 
-        if (!answered) {
-
-            await check();
-            answered = true;
-
-        } else {
-
-            await nextTask();
-            answered = false;
-
-        }
+        await check();
 
     }
 
 });
     function add(val) {
-        document.getElementById("answer").value += val;
+    const input = document.getElementById("answer");
+    input.value += val;
+    input.focus();
 }
 
-    function clearInput() {
-        document.getElementById("answer").value = "";
+function clearInput() {
+    const input = document.getElementById("answer");
+    input.value = "";
+    input.focus();
 }
     </script>
     </div> <!-- closes main -->
@@ -528,7 +535,7 @@ def check(answer: str):
         # 2) mathematisch richtig, aber noch nicht in einer einfachen Form
         preferred = sp.simplify(correct)
 
-        if user_s != preferred and str(user_s) != str(preferred):
+        if sp.simplify(user_s - preferred) != 0:
             return {
                 "correct": False,
                 "feedback": "⚠ Richtig, aber bitte weiter vereinfachen!"
