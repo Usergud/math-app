@@ -220,49 +220,104 @@ def home():
                 border: 1px solid #ccc;
             }
 
-            button {
-                font-size: 18px;
-                padding: 10px 15px;
-                margin: 10px;
-                border-radius: 8px;
-                border: none;
-                cursor: pointer;
-                background-color: #4a6cf7;
-                color: white;
-            }
+           #sidebar button {
 
-            button:hover {
-                background-color: #3557d6;
-            }
+    font-size: 18px;
+
+    padding: 10px 15px;
+
+    margin: 10px 0;
+
+    border-radius: 8px;
+
+    border: none;
+
+    cursor: pointer;
+
+    background-color: #4a6cf7;
+
+    color: white;
+}
+
+#sidebar button:hover {
+
+    background-color: #3557d6;
+}
 
             #result {
                 font-size: 22px;
                 margin-top: 20px;
             }
-            .math-table {
-    margin: 20px auto;
-    border-collapse: collapse;
-    font-size: 18px;
+            
+
+.math-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 72px);
+    gap: 10px;
+
+    justify-content: center;
+
+    margin: 25px auto;
+
+    max-width: 420px;
 }
 
-.math-table td {
-    padding: 10px 18px;
-    border: 1px solid #ddd;
-}
+.math-grid button {
 
-.math-table td:first-child {
-    background: #f0f0f0;
-    font-weight: bold;
-    width: 80px;
-}
+    height: 60px;
 
-.math-table td:last-child {
+    font-size: 22px;
+
+    border: 1px solid #bbb;
+
+    border-radius: 14px;
+
+    background: white;
+
+    color: #222;
+
     cursor: pointer;
-    transition: 0.2s;
+
+    transition: 0.15s;
 }
 
-.math-table td:last-child:hover {
-    background: #e6e6e6;
+.math-grid button:hover {
+
+    background: #f2f2f2;
+
+    transform: translateY(-1px);
+}
+.action-buttons {
+
+    margin-top: 20px;
+}
+
+.action-buttons button {
+
+    font-size: 18px;
+
+    padding: 12px 20px;
+
+    margin: 10px;
+
+    border-radius: 12px;
+
+    border: none;
+
+    background: #4a6cf7;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+.action-buttons button:hover {
+
+    background: #3557d6;
+
+    transform: translateY(-1px);
 }
         </style>
     </head>
@@ -310,39 +365,46 @@ def home():
 
         <br>
         
-        <div id="mathpad">
+        
 
-<table class="math-table">
-    <tr><td>7</td><td onclick="add('7')">7</td></tr>
-    <tr><td>8</td><td onclick="add('8')">8</td></tr>
-    <tr><td>9</td><td onclick="add('9')">9</td></tr>
-    <tr><td>0</td><td onclick="add('0')">0</td></tr>
+<div class="math-grid">
 
-    <tr><td>+</td><td onclick="add('+')">+</td></tr>
-    <tr><td>−</td><td onclick="add('-')">−</td></tr>
-    <tr><td>·</td><td onclick="add('*')">·</td></tr>
-    <tr><td>÷</td><td onclick="add('/')">/</td></tr>
+<button onclick="add('7')">7</button>
+<button onclick="add('8')">8</button>
+<button onclick="add('9')">9</button>
+<button onclick="add('+')">+</button>
+<button onclick="add('-')">−</button>
 
-    <tr><td>( )</td><td onclick="add('(')"> ( </td></tr>
-    <tr><td>( )</td><td onclick="add(')')"> ) </td></tr>
+<button onclick="add('4')">4</button>
+<button onclick="add('5')">5</button>
+<button onclick="add('6')">6</button>
+<button onclick="add('*')">·</button>
+<button onclick="add('/')">/</button>
 
-    <tr><td>x</td><td onclick="add('x')">x</td></tr>
+<button onclick="add('1')">1</button>
+<button onclick="add('2')">2</button>
+<button onclick="add('3')">3</button>
+<button onclick="add('(')">(</button>
+<button onclick="add(')')">)</button>
 
-    <tr><td>√</td><td onclick="add('sqrt(')">√</td></tr>
+<button onclick="add('0')">0</button>
+<button onclick="add('x')">𝑥</button>
+<button onclick="add('^')">^</button>
+<button onclick="add('sqrt(')">√</button>
+<button onclick="add('pi')">π</button>
 
-    <tr><td>sin</td><td onclick="add('sin(')">sin</td></tr>
-    <tr><td>cos</td><td onclick="add('cos(')">cos</td></tr>
-    <tr><td>tan</td><td onclick="add('tan(')">tan</td></tr>
+<button onclick="add('sin(')">sin</button>
+<button onclick="add('cos(')">cos</button>
+<button onclick="add('tan(')">tan</button>
+<button onclick="add('e')">𝑒</button>
+<button onclick="clearInput()">⌫</button>
 
-    <tr><td>π</td><td onclick="add('pi')">π</td></tr>
-    <tr><td>e</td><td onclick="add('e')">e</td></tr>
+</div>
 
-    <tr><td>⌫</td><td onclick="clearInput()">Löschen</td></tr>
-</table>
-
-        <button onclick="check()">Prüfen</button>
-        <button onclick="nextTask()">Nächste Aufgabe</button>
-
+        <div class="action-buttons">
+    <button onclick="check()">Prüfen</button>
+    <button onclick="nextTask()">Nächste Aufgabe</button>
+</div>
         <div id="result"></div>
 
         <script>
@@ -384,6 +446,7 @@ async function setCategory(cat) {
 
 function add(val) {
     const input = document.getElementById("answer");
+    if (val === "^") val = "**";
     input.value += val;
     input.focus();
 }
@@ -401,29 +464,7 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
         await check();
     }
 });
-
-
-            
-            loadTask();
-
-document.getElementById("answer").addEventListener("keydown", async function(event) {
-
-    if (event.key === "Enter") {
-
-        await check();
-
-    }
-
-});
-    function add(val) {
-    const input = document.getElementById("answer");
-
-    // ^ → ** für Python/Sympy
-    if (val === "^") val = "**";
-
-    input.value += val;
-    input.focus();
-}
+    
 
 function clearInput() {
     const input = document.getElementById("answer");
