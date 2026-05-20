@@ -239,6 +239,27 @@ def home():
                 font-size: 22px;
                 margin-top: 20px;
             }
+            .mathpad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    max-width: 420px;
+    margin: 20px auto;
+}
+
+.mathpad button {
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #4a6cf7;
+    color: white;
+    cursor: pointer;
+}
+
+.mathpad button:hover {
+    background: #3557d6;
+}
         </style>
     </head>
     
@@ -287,50 +308,42 @@ def home():
         
         <div id="mathpad">
 
-<table id="mathpad_table" style="margin: 0 auto; border-collapse: separate; border-spacing: 8px;">
-    <tr>
-        <td><button type="button" onclick="add('7')">7</button></td>
-        <td><button type="button" onclick="add('8')">8</button></td>
-        <td><button type="button" onclick="add('9')">9</button></td>
-        <td><button type="button" onclick="add('/')">/</button></td>
-        <td><button type="button" onclick="add('sqrt(')">√</button></td>
-    </tr>
-    <tr>
-        <td><button type="button" onclick="add('4')">4</button></td>
-        <td><button type="button" onclick="add('5')">5</button></td>
-        <td><button type="button" onclick="add('6')">6</button></td>
-        <td><button type="button" onclick="add('*')">·</button></td>
-        <td><button type="button" onclick="add('^')">^</button></td>
-    </tr>
-    <tr>
-        <td><button type="button" onclick="add('1')">1</button></td>
-        <td><button type="button" onclick="add('2')">2</button></td>
-        <td><button type="button" onclick="add('3')">3</button></td>
-        <td><button type="button" onclick="add('-')">-</button></td>
-        <td><button type="button" onclick="add('(')">(</button></td>
-    </tr>
-    <tr>
-        <td><button type="button" onclick="add('0')">0</button></td>
-        <td><button type="button" onclick="add('x')">x</button></td>
-        <td><button type="button" onclick="add('+')">+</button></td>
-        <td><button type="button" onclick="add(')')">)</button></td>
-        <td><button type="button" onclick="clearInput()">⌫ löschen</button></td>
-    </tr>
-    <tr>
-        <td><button type="button" onclick="add('sin(')">sin</button></td>
-        <td><button type="button" onclick="add('cos(')">cos</button></td>
-        <td><button type="button" onclick="add('tan(')">tan</button></td>
-        <td><button type="button" onclick="add('log(')">log</button></td>
-        <td><button type="button" onclick="add('ln(')">ln</button></td>
-    </tr>
-    <tr>
-        <td><button type="button" onclick="add('exp(')">e^x</button></td>
-        <td><button type="button" onclick="add('pi')">π</button></td>
-        <td><button type="button" onclick="add('e')">e</button></td>
-        <td><button type="button" onclick="add('**')">**</button></td>
-        <td><button type="button" onclick="add('Abs(')">|x|</button></td>
-    </tr>
-</table>
+<div id="mathpad" class="mathpad">
+    <button type="button" onclick="add('7')">7</button>
+    <button type="button" onclick="add('8')">8</button>
+    <button type="button" onclick="add('9')">9</button>
+    <button type="button" onclick="add('/')">/</button>
+    <button type="button" onclick="add('sqrt(')">√</button>
+
+    <button type="button" onclick="add('4')">4</button>
+    <button type="button" onclick="add('5')">5</button>
+    <button type="button" onclick="add('6')">6</button>
+    <button type="button" onclick="add('*')">·</button>
+    <button type="button" onclick="add('^')">^</button>
+
+    <button type="button" onclick="add('1')">1</button>
+    <button type="button" onclick="add('2')">2</button>
+    <button type="button" onclick="add('3')">3</button>
+    <button type="button" onclick="add('-')">-</button>
+    <button type="button" onclick="add('(')">(</button>
+
+    <button type="button" onclick="add('0')">0</button>
+    <button type="button" onclick="add('x')">x</button>
+    <button type="button" onclick="add('+')">+</button>
+    <button type="button" onclick="add(')')">)</button>
+    <button type="button" onclick="clearInput()">⌫</button>
+
+    <button type="button" onclick="add('sin(')">sin</button>
+    <button type="button" onclick="add('cos(')">cos</button>
+    <button type="button" onclick="add('tan(')">tan</button>
+    <button type="button" onclick="add('log(')">log</button>
+    <button type="button" onclick="add('ln(')">ln</button>
+
+    <button type="button" onclick="add('exp(')">e^x</button>
+    <button type="button" onclick="add('pi')">π</button>
+    <button type="button" onclick="add('e')">e</button>
+    <button type="button" onclick="add('Abs(')">|x|</button>
+    <button type="button" onclick="add('**')">**</button>
 </div>
 
         <button onclick="check()">Prüfen</button>
@@ -341,48 +354,59 @@ def home():
         <script>
         
         let answered = false;
-        
-            async function loadTask() {
-                let res = await fetch("/task");
-                let data = await res.json();
-                document.getElementById("task").innerHTML = "$$" + data.task + "$$";
 
-                MathJax.typesetClear();
-                MathJax.typesetPromise();
-            }
-
-            async function check() {
-                let ans = document.getElementById("answer").value;
-
-                let res = await fetch("/check?answer=" + encodeURIComponent(ans));
-                let data = await res.json();
-
-                document.getElementById("result").innerHTML = data.feedback;
-
-                MathJax.typesetClear();
-                MathJax.typesetPromise();
-            }
-
-            async function nextTask() {
-                await fetch("/next");
-                await loadTask();
-                document.getElementById("answer").value = "";
-                document.getElementById("result").innerHTML = "";
-                answered = false;
-                document.getElementById("answer").focus();
-            }
-            
-            async function setCategory(cat) {
-
-                await fetch("/category?name=" + cat);
-
-                document.getElementById("answer").value = "";
-                document.getElementById("result").innerHTML = "";
-
-                answered = false;
-
-                await loadTask();
+async function loadTask() {
+    const res = await fetch("/task");
+    const data = await res.json();
+    document.getElementById("task").innerHTML = "$$" + data.task + "$$";
+    MathJax.typesetClear();
+    MathJax.typesetPromise();
 }
+
+async function check() {
+    const ans = document.getElementById("answer").value;
+    const res = await fetch("/check?answer=" + encodeURIComponent(ans));
+    const data = await res.json();
+    document.getElementById("result").innerHTML = data.feedback;
+    MathJax.typesetClear();
+    MathJax.typesetPromise();
+}
+
+async function nextTask() {
+    await fetch("/next");
+    document.getElementById("answer").value = "";
+    document.getElementById("result").innerHTML = "";
+    answered = false;
+    await loadTask();
+}
+
+async function setCategory(cat) {
+    await fetch("/category?name=" + cat);
+    document.getElementById("answer").value = "";
+    document.getElementById("result").innerHTML = "";
+    answered = false;
+    await loadTask();
+}
+
+function add(val) {
+    const input = document.getElementById("answer");
+    input.value += val;
+    input.focus();
+}
+
+function clearInput() {
+    const input = document.getElementById("answer");
+    input.value = "";
+    input.focus();
+}
+
+loadTask();
+
+document.getElementById("answer").addEventListener("keydown", async function(event) {
+    if (event.key === "Enter") {
+        await check();
+    }
+});
 
 
             
