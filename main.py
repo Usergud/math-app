@@ -320,12 +320,11 @@ def home():
     transform: translateY(-1px);
 }
 
-#prettyInput {
+#preview {
     font-size: 28px;
-    margin-top: 15px;
+    margin-top: 10px;
     min-height: 40px;
     color: #222;
-    font-family: 'Times New Roman', serif;
 }
 
         </style>
@@ -371,7 +370,7 @@ def home():
         <div id="task"></div>
 
         <input id="answer" placeholder="Tippe oder klicke Buttons..." style="width: 340px;">
-        <div id="prettyInput"></div>
+        <div id="preview"></div>
 
         <br>
         
@@ -398,6 +397,7 @@ def home():
 <button onclick="add(')')">)</button>
 
 <button onclick="add('0')">0</button>
+<button onclick="add('.')">.</button>
 <button onclick="add('x')">𝑥</button>
 <button onclick="add('^')">^</button>
 <button onclick="add('sqrt(')">√</button>
@@ -406,6 +406,8 @@ def home():
 <button onclick="add('sin(')">sin</button>
 <button onclick="add('cos(')">cos</button>
 <button onclick="add('tan(')">tan</button>
+<button onclick="add('ln(')">ln</button>
+<button onclick="add('log(')">log</button>
 <button onclick="add('e')">𝑒</button>
 <button onclick="clearInput()">⌫</button>
 
@@ -459,7 +461,7 @@ function add(val) {
     if (val === "^") val = "**";
     input.value += val;
 
-updatePrettyInput();
+
 
 input.focus();
 }
@@ -467,41 +469,31 @@ input.focus();
 function clearInput() {
     const input = document.getElementById("answer");
     input.value = "";
-    updatePrettyInput();
+    document.getElementById("preview").innerHTML = "";
     input.focus();
 }
 
-
 loadTask();
 
-document.getElementById("answer").addEventListener("keydown", async function(event) {
-    if (event.key === "Enter") {
-        await check();
-    }
+document.getElementById("answer").addEventListener("input", function () {
+    const val = this.value;
+    document.getElementById("preview").innerHTML = toPretty(val);
 });
     
 
-function updatePrettyInput() {
-
-    let val = document.getElementById("answer").value;
-
-    // schöne Zeichen
-    val = val.replace(/\bpi\b/g, "π");
-
-    val = val.replaceAll("*", "·");
-
-    val = val.replaceAll("sqrt(", "√(");
-
-    val = val.replace(/\bx\b/g, "𝑥");
-    val = val.replace(/\be\b/g, "𝑒");
-
-    val = val.replace(/\*\*2/g, "²");
-val = val.replace(/\*\*3/g, "³");
-val = val.replace(/\*\*4/g, "⁴");
-
-    document.getElementById("prettyInput").textContent = val;
+function toPretty(val) {
+    return val
+        .replace(/\bpi\b/g, "π")
+        .replace(/\bsqrt\(/g, "√(")
+        .replace(/\bln\(/g, "ln(")
+        .replace(/\blog\(/g, "log(")
+        .replace(/\be\b/g, "𝑒")
+        .replace(/\bx\b/g, "𝑥")
+        .replace(/\*\*2/g, "²")
+        .replace(/\*\*3/g, "³")
+        .replace(/\*\*4/g, "⁴")
+        .replace(/\*/g, "·");
 }
-document.getElementById("answer").addEventListener("input", updatePrettyInput);
     </script>
     </div> <!-- closes main -->
     </body>
