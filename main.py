@@ -239,26 +239,30 @@ def home():
                 font-size: 22px;
                 margin-top: 20px;
             }
-            .mathpad {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    max-width: 420px;
+            .math-table {
     margin: 20px auto;
-}
-
-.mathpad button {
+    border-collapse: collapse;
     font-size: 18px;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: #4a6cf7;
-    color: white;
-    cursor: pointer;
 }
 
-.mathpad button:hover {
-    background: #3557d6;
+.math-table td {
+    padding: 10px 18px;
+    border: 1px solid #ddd;
+}
+
+.math-table td:first-child {
+    background: #f0f0f0;
+    font-weight: bold;
+    width: 80px;
+}
+
+.math-table td:last-child {
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.math-table td:last-child:hover {
+    background: #e6e6e6;
 }
         </style>
     </head>
@@ -308,43 +312,33 @@ def home():
         
         <div id="mathpad">
 
-<div id="mathpad" class="mathpad">
-    <button type="button" onclick="add('7')">7</button>
-    <button type="button" onclick="add('8')">8</button>
-    <button type="button" onclick="add('9')">9</button>
-    <button type="button" onclick="add('/')">/</button>
-    <button type="button" onclick="add('sqrt(')">√</button>
+<table class="math-table">
+    <tr><td>7</td><td onclick="add('7')">7</td></tr>
+    <tr><td>8</td><td onclick="add('8')">8</td></tr>
+    <tr><td>9</td><td onclick="add('9')">9</td></tr>
+    <tr><td>0</td><td onclick="add('0')">0</td></tr>
 
-    <button type="button" onclick="add('4')">4</button>
-    <button type="button" onclick="add('5')">5</button>
-    <button type="button" onclick="add('6')">6</button>
-    <button type="button" onclick="add('*')">·</button>
-    <button type="button" onclick="add('^')">^</button>
+    <tr><td>+</td><td onclick="add('+')">+</td></tr>
+    <tr><td>−</td><td onclick="add('-')">−</td></tr>
+    <tr><td>·</td><td onclick="add('*')">·</td></tr>
+    <tr><td>÷</td><td onclick="add('/')">/</td></tr>
 
-    <button type="button" onclick="add('1')">1</button>
-    <button type="button" onclick="add('2')">2</button>
-    <button type="button" onclick="add('3')">3</button>
-    <button type="button" onclick="add('-')">-</button>
-    <button type="button" onclick="add('(')">(</button>
+    <tr><td>( )</td><td onclick="add('(')"> ( </td></tr>
+    <tr><td>( )</td><td onclick="add(')')"> ) </td></tr>
 
-    <button type="button" onclick="add('0')">0</button>
-    <button type="button" onclick="add('x')">x</button>
-    <button type="button" onclick="add('+')">+</button>
-    <button type="button" onclick="add(')')">)</button>
-    <button type="button" onclick="clearInput()">⌫</button>
+    <tr><td>x</td><td onclick="add('x')">x</td></tr>
 
-    <button type="button" onclick="add('sin(')">sin</button>
-    <button type="button" onclick="add('cos(')">cos</button>
-    <button type="button" onclick="add('tan(')">tan</button>
-    <button type="button" onclick="add('log(')">log</button>
-    <button type="button" onclick="add('ln(')">ln</button>
+    <tr><td>√</td><td onclick="add('sqrt(')">√</td></tr>
 
-    <button type="button" onclick="add('exp(')">e^x</button>
-    <button type="button" onclick="add('pi')">π</button>
-    <button type="button" onclick="add('e')">e</button>
-    <button type="button" onclick="add('Abs(')">|x|</button>
-    <button type="button" onclick="add('**')">**</button>
-</div>
+    <tr><td>sin</td><td onclick="add('sin(')">sin</td></tr>
+    <tr><td>cos</td><td onclick="add('cos(')">cos</td></tr>
+    <tr><td>tan</td><td onclick="add('tan(')">tan</td></tr>
+
+    <tr><td>π</td><td onclick="add('pi')">π</td></tr>
+    <tr><td>e</td><td onclick="add('e')">e</td></tr>
+
+    <tr><td>⌫</td><td onclick="clearInput()">Löschen</td></tr>
+</table>
 
         <button onclick="check()">Prüfen</button>
         <button onclick="nextTask()">Nächste Aufgabe</button>
@@ -423,6 +417,10 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
 });
     function add(val) {
     const input = document.getElementById("answer");
+
+    // ^ → ** für Python/Sympy
+    if (val === "^") val = "**";
+
     input.value += val;
     input.focus();
 }
