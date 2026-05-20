@@ -319,6 +319,15 @@ def home():
 
     transform: translateY(-1px);
 }
+
+#prettyInput {
+    font-size: 28px;
+    margin-top: 15px;
+    min-height: 40px;
+    color: #222;
+    font-family: 'Times New Roman', serif;
+}
+
         </style>
     </head>
     
@@ -362,6 +371,7 @@ def home():
         <div id="task"></div>
 
         <input id="answer" placeholder="Tippe oder klicke Buttons..." style="width: 340px;">
+        <div id="prettyInput"></div>
 
         <br>
         
@@ -415,7 +425,7 @@ async function loadTask() {
     const res = await fetch("/task");
     const data = await res.json();
     document.getElementById("task").innerHTML = "$$" + data.task + "$$";
-    MathJax.typesetClear();
+    
     MathJax.typesetPromise();
 }
 
@@ -424,7 +434,7 @@ async function check() {
     const res = await fetch("/check?answer=" + encodeURIComponent(ans));
     const data = await res.json();
     document.getElementById("result").innerHTML = data.feedback;
-    MathJax.typesetClear();
+    
     MathJax.typesetPromise();
 }
 
@@ -448,14 +458,19 @@ function add(val) {
     const input = document.getElementById("answer");
     if (val === "^") val = "**";
     input.value += val;
-    input.focus();
+
+updatePrettyInput();
+
+input.focus();
 }
 
 function clearInput() {
     const input = document.getElementById("answer");
     input.value = "";
+    updatePrettyInput();
     input.focus();
 }
+
 
 loadTask();
 
@@ -466,11 +481,27 @@ document.getElementById("answer").addEventListener("keydown", async function(eve
 });
     
 
-function clearInput() {
-    const input = document.getElementById("answer");
-    input.value = "";
-    input.focus();
+function updatePrettyInput() {
+
+    let val = document.getElementById("answer").value;
+
+    // schöne Zeichen
+    val = val.replace(/\bpi\b/g, "π");
+
+    val = val.replaceAll("*", "·");
+
+    val = val.replaceAll("sqrt(", "√(");
+
+    val = val.replace(/\bx\b/g, "𝑥");
+    val = val.replace(/\be\b/g, "𝑒");
+
+    val = val.replace(/\*\*2/g, "²");
+val = val.replace(/\*\*3/g, "³");
+val = val.replace(/\*\*4/g, "⁴");
+
+    document.getElementById("prettyInput").textContent = val;
 }
+document.getElementById("answer").addEventListener("input", updatePrettyInput);
     </script>
     </div> <!-- closes main -->
     </body>
@@ -512,14 +543,14 @@ def same_math(a, b):
     ]
     for t in tests:
         try:
-            if t.equals(0) is True:
+            if t is not None and t.equals(0) is True:
                 return True
         except Exception:
             pass
     return False
 
 
-def accepted_forms(expr):
+
     base = sp.simplify(expr)
 
     forms = [
