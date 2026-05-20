@@ -395,15 +395,35 @@ def check(answer: str):
     try:
         user = parse_expr(answer, transformations=transformations)
 
-        if sp.simplify(user - correct_answer).equals(0):
-            return {"correct": True, "feedback": "✅ Richtig!"}
-        else:
-
-
+        # ❌ diff verbieten
+        if "Derivative" in str(user) or "diff" in str(answer):
             return {
                 "correct": False,
-                "feedback": "❌ Falsch. Lösung: \\(" + sp.latex(correct_answer) + "\\)"
+                "feedback": "⚠ Bitte leite selbst ab, nicht mit diff()"
             }
+
+        # echte richtige Lösung
+        correct = sp.simplify(correct_answer)
+        user_s = sp.simplify(user)
+
+        # 1) komplett korrekt (egal welche Form)
+        if sp.simplify(user_s - correct).equals(0):
+            return {"correct": True, "feedback": "✅ Richtig!"}
+
+        # 2) teilweise korrekt aber nicht schön vereinfacht
+        # (wir prüfen: gleiche Struktur nach expand + simplify)
+        if sp.simplify(sp.expand(user) - sp.expand(correct)).equals(0):
+            return {
+                "correct": False,
+                "feedback": "⚠ Richtig, aber bitte weiter vereinfachen!"
+            }
+
+        # 3) falsch
+        return {
+            "correct": False,
+            "feedback": "❌ Falsch. Lösung: \\(" + sp.latex(correct) + "\\)"
+        }
+
     except:
         return {
             "correct": False,
