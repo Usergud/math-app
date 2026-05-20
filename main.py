@@ -60,41 +60,80 @@ transformations = (
 
 categories = {
 
+    # 🟢 Basics (11. Klasse)
     "polynomial": [
         x**2 + 3*x,
         2*x**3 - x,
         4*x**2 + 5*x,
         x**4 - x**2,
         6*x + 3,
-        7*x**2,
-        x**3 + 2*x + 1,
-        5*x**4
+        x**5 + 2*x**3,
+        (x**2 + x),
+        3*x**4 - x**2 + 2*x,
+        x**6 + x,
+        (2*x + 1)**2
     ],
 
+    # 🟡 Kettenregel
     "chain": [
         (x**2 + 1)**3,
         (x**2 + x)**5,
-        (1 + x**2)**(-1)
+        (3*x + 2)**4,
+        (x**2 - 1)**2,
+        (x + 5)**6,
+        sp.sqrt(x**2 + 1),
+        (x**2 + 4)**(3/2),
+        (2*x**2 + 3*x + 1)**3,
+        (x**3 + 1)**2,
     ],
 
+    # 🔵 Produktregel (auch gemischt mit Wurzeln)
     "product": [
         (x**2 + 1)*(x**3 - x),
         x*(x**2 + 3)**4,
-        x**2 * (x + 1)**2
+        x**2 * (x + 1)**2,
+        (x + 2)*(x**2 + 1),
+        x * sp.sqrt(x**2 + 1),
+        (x**2 + 1) * sp.sqrt(x + 1),
+        (x + 1)*(x**2 + 3)**2,
+        x*(x**2 + 1)*(x + 2),
     ],
 
+    # 🟣 Quotientenregel (auch mit trig / Wurzeln)
     "quotient": [
         (x**3 + 2*x)/(x**2 + 1),
-        (x + 1)/(x**3 + 1)
+        (x + 1)/(x**3 + 1),
+        (x**2 + 1)/(x + 2),
+        (x**3 - x)/(x + 1),
+        (2*x + 3)/(x**2 + 4),
+        sp.sin(x)/(x + 1),
+        sp.cos(x)/(x**2 + 1),
+        sp.sqrt(x)/(x + 1),
     ],
 
+    # 🟠 Mixed (Trig + Exp + Produkt + Kette)
     "special": [
-        x**x,
-        sp.sqrt(x**2 + 1)
+        x**2 * sp.sin(x),
+        x * sp.cos(x),
+        sp.exp(x) * x,
+        sp.exp(x) * sp.sin(x),
+        (x**2 + 1) * sp.cos(x),
+        sp.sin(x) * sp.exp(x),
+        x * sp.exp(x) * sp.cos(x),
     ],
 
+    # 🔴 EXTREM (Abi+ – alles gemischt, aber sauber vereinfachbar)
     "extreme": [
-        ((x**2 + 1)**3 * sp.sin(x))/(sp.sqrt(x**3 + 1))
+        (x**2 + 1) * sp.sin(x),
+        (x**2 + 1) * sp.cos(x),
+        x * (x**2 + 1) * sp.sin(x),
+        sp.exp(x) * (x**2 + 1) * sp.cos(x),
+        (x**2 + 1)**2 * sp.sin(x),
+        (x + 1) * sp.sqrt(x**2 + 1) * sp.cos(x),
+        (x**2 + 1) / (x + 1) * sp.sin(x),
+        x * sp.sqrt(x**2 + 1) * sp.exp(x),
+        (x**2 + 1)**(3/2) * sp.cos(x),
+        x * (x**2 + 1) * sp.exp(x),
     ]
 }
 current_category = "polynomial"
