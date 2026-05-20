@@ -390,41 +390,111 @@ def set_category(name: str):
 
     return {"ok": True}
 
+def same_math(a, b):
+    d = a - b
+    tests = [
+        d,
+        sp.simplify(d),
+        sp.together(d),
+        sp.cancel(d),
+        sp.trigsimp(d),
+    ]
+    for t in tests:
+        try:
+            if t.equals(0) is True:
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def accepted_forms(expr):
+    base = sp.simplify(expr)
+
+    forms = [
+        base,
+        sp.expand(base),
+        sp.factor(base),
+        sp.trigsimp(base),
+        sp.cancel(sp.together(base)),
+        sp.together(base),
+        sp.powsimp(base, force=True),
+    ]
+
+    unique = []
+    seen = set()
+
+    for f in forms:
+        try:
+            key = sp.srepr(f)
+        except Exception:
+            key = str(f)
+
+        if key not in seen:
+            seen.add(key)
+            unique.append(f)
+
+    return unique
+
+
 @app.get("/check")
 def check(answer: str):
     try:
-        user = parse_expr(answer, transformations=transformations)
+        raw = answer.strip()
 
-        # ❌ diff verbieten
-        if "Derivative" in str(user) or "diff" in str(answer):
+        if not raw:
+            return {
+                "correct": False,
+                "feedback": "⚠ Schreib z.B. 2x+3"
+            }
+
+        # diff verbieten
+        low = raw.lower()
+        if "diff" in low or "derivative" in low:
             return {
                 "correct": False,
                 "feedback": "⚠ Bitte leite selbst ab, nicht mit diff()"
             }
 
-        # echte richtige Lösung
+        user = parse_expr(
+            raw,
+            transformations=transformations,
+            local_dict={
+                "x": x,
+                "sin": sp.sin,
+                "cos": sp.cos,
+                "tan": sp.tan,
+                "exp": sp.exp,
+                "sqrt": sp.sqrt,
+                "log": sp.log,
+                "ln": sp.log,
+                "pi": sp.pi,
+                "E": sp.E,
+                "e": sp.E,
+                "Abs": sp.Abs,
+            }
+        )
+
         correct = sp.simplify(correct_answer)
-        user_s = sp.simplify(user)
 
-        # 1) komplett korrekt (egal welche Form)
-        if sp.simplify(user_s - correct).equals(0):
-            return {"correct": True, "feedback": "✅ Richtig!"}
-
-        # 2) teilweise korrekt aber nicht schön vereinfacht
-        # (wir prüfen: gleiche Struktur nach expand + simplify)
-        if sp.simplify(sp.expand(user) - sp.expand(correct)).equals(0):
+        # mathematisch falsch
+        if not same_math(user, correct):
             return {
                 "correct": False,
-                "feedback": "⚠ Richtig, aber bitte weiter vereinfachen!"
+                "feedback": "❌ Falsch. Lösung: \\(" + sp.latex(correct) + "\\)"
             }
 
-        # 3) falsch
+        # mathematisch richtig, aber noch nicht in einer sauberen Standardform
+        for form in accepted_forms(correct):
+            if user == form:
+                return {"correct": True, "feedback": "✅ Richtig!"}
+
         return {
             "correct": False,
-            "feedback": "❌ Falsch. Lösung: \\(" + sp.latex(correct) + "\\)"
+            "feedback": "⚠ Richtig, aber bitte weiter vereinfachen!"
         }
 
-    except:
+    except Exception:
         return {
             "correct": False,
             "feedback": "⚠ Schreib z.B. 2x+3"
