@@ -58,37 +58,46 @@ transformations = (
     (implicit_multiplication_application, convert_xor)
 )
 
-# 👉 Aufgaben
+categories = {
 
-# 👉 Aufgaben
+    "polynomial": [
+        x**2 + 3*x,
+        2*x**3 - x,
+        4*x**2 + 5*x,
+        x**4 - x**2,
+        6*x + 3,
+        7*x**2,
+        x**3 + 2*x + 1,
+        5*x**4
+    ],
 
-# 🟢 EASY (klassische Schulableitungen)
-easy_tasks = [
-    x**2 + 3*x,
-    2*x**3 - x,
-    4*x**2 + 5*x,
-    x**4 - x**2,
-    6*x + 3,
-    7*x**2,
-    x**3 + 2*x + 1,
-    5*x**4
-]
+    "chain": [
+        (x**2 + 1)**3,
+        (x**2 + x)**5,
+        (1 + x**2)**(-1)
+    ],
 
-# 🔴 HARD (Mix aus Kettenregel, Produktregel, Quotientenregel, Wurzeln, Brüche, trig)
-hard_tasks = [
-    (x**2 + 1)*(x**3 - x),                  # Produktregel
-    (x**3 + 2*x)/(x**2 + 1),                # Quotientenregel
-    (x**2 + 1)**3,                          # Kettenregel
-    (x**2 + x)**5,                          # starke Kettenregel
-    x* (x**2 + 3)**4,                       # Produkt + Kette
-    (x + 1)/(x**3 + 1),                     # Quotient
-    x**x,                                    # exponentielle Funktion
-    x**2 * (x + 1)**2,                      # gemischt
-    sp.sqrt(x**2 + 1),                        # Wurzel + Kette
-    (1 + x**2)**(-1),                      # negative Potenz
-]
+    "product": [
+        (x**2 + 1)*(x**3 - x),
+        x*(x**2 + 3)**4,
+        x**2 * (x + 1)**2
+    ],
 
-difficulty = "easy"
+    "quotient": [
+        (x**3 + 2*x)/(x**2 + 1),
+        (x + 1)/(x**3 + 1)
+    ],
+
+    "special": [
+        x**x,
+        sp.sqrt(x**2 + 1)
+    ],
+
+    "extreme": [
+        ((x**2 + 1)**3 * sp.sin(x))/(sp.sqrt(x**3 + 1))
+    ]
+}
+current_category = "polynomial"
 
 
 current_function = None
@@ -97,10 +106,9 @@ correct_answer = None
 
 def new_task():
     global current_function, correct_answer
-    if difficulty == "easy":
-        current_function = random.choice(easy_tasks)
-    else:
-        current_function = random.choice(hard_tasks)
+
+    current_function = random.choice(categories[current_category])
+
     correct_answer = sp.simplify(sp.diff(current_function, x))
 
 
@@ -198,17 +206,38 @@ def home():
     <body>
         <div id="sidebar">
 
-    <h2>Schwierigkeit</h2>
+    <h2>📘 Ableitungen</h2>
 
-    <button onclick="setDifficulty('easy')">Einfach</button>
-    <button onclick="setDifficulty('hard')">Schwer</button>
+    <button onclick="setCategory('polynomial')">
+    Polynome
+    </button>
+
+    <button onclick="setCategory('chain')">
+    Kettenregel
+    </button>
+
+    <button onclick="setCategory('product')">
+    Produktregel
+    </button>
+
+    <button onclick="setCategory('quotient')">
+    Quotientenregel
+    </button>
+
+    <button onclick="setCategory('special')">
+    Spezial
+    </button>
+
+    <button onclick="setCategory('extreme')">
+    Extrem
+    </button>
 
     </div>
 
     <div id="main">
 
         <h1>📘 Mathe Trainer</h1>
-        <div id="difficultyDisplay">Schwierigkeit: Einfach</div>
+        
 
         <p>Leite ab:</p>
         <div id="task"></div>
@@ -223,7 +252,9 @@ def home():
         <div id="result"></div>
 
         <script>
-
+        
+        let answered = false;
+        
             async function loadTask() {
                 let res = await fetch("/task");
                 let data = await res.json();
@@ -254,23 +285,20 @@ def home():
                 document.getElementById("answer").focus();
             }
             
-            async function setDifficulty(level) {
+            async function setCategory(cat) {
 
-                await fetch("/difficulty?level=" + level);
+                await fetch("/category?name=" + cat);
 
                 document.getElementById("answer").value = "";
                 document.getElementById("result").innerHTML = "";
 
-                if (level === "easy") {
-                    document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Einfach";
-                } else {
-                    document.getElementById("difficultyDisplay").innerText = "Schwierigkeit: Schwer";
-                }
+                answered = false;
 
                 await loadTask();
 }
 
-            let answered = false;
+
+            
             loadTask();
 
 document.getElementById("answer").addEventListener("keydown", async function(event) {
@@ -310,16 +338,18 @@ def task():
 def next_task():
     new_task()
     return {"ok": True}
-@app.get("/difficulty")
-def set_difficulty(level: str):
+@app.get("/category")
+def set_category(name: str):
 
-    global difficulty
+    global current_category
 
-    difficulty = level
+    if name in categories:
+        current_category = name
+    else:
+        return {"ok": False}
     new_task()
 
     return {"ok": True}
-
 
 @app.get("/check")
 def check(answer: str):
