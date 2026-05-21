@@ -464,25 +464,23 @@ function clearInput() {
 
 loadTask();
 
-document.getElementById("answer").addEventListener("input", function () {
-    const val = this.value;
-    document.getElementById("preview").innerHTML = toPretty(val);
+document.getElementById("answer").addEventListener("input", async function () {
+    const val = this.value.trim();
+    const preview = document.getElementById("preview");
+    if (!val) { preview.innerHTML = ""; return; }
+    try {
+        const res = await fetch("/preview?expr=" + encodeURIComponent(val));
+        const data = await res.json();
+        if (data.latex) {
+            preview.innerHTML = "\\(" + data.latex + "\\)";
+            MathJax.typesetPromise([preview]);
+        } else {
+            preview.innerHTML = "";
+        }
+    } catch(e) {
+        preview.innerHTML = "";
+    }
 });
-    
-
-function toPretty(val) {
-    return val
-        .replace(/\bpi\b/g, "π")
-        .replace(/\bsqrt\(/g, "√(")
-        .replace(/\bln\(/g, "ln(")
-        .replace(/\blog\(/g, "log(")
-        .replace(/\be\b/g, "𝑒")
-        .replace(/\bx\b/g, "𝑥")
-        .replace(/\*\*2/g, "²")
-        .replace(/\*\*3/g, "³")
-        .replace(/\*\*4/g, "⁴")
-        .replace(/\*/g, "·");
-}
     </script>
     </div> <!-- closes main -->
     </body>
@@ -494,6 +492,21 @@ function toPretty(val) {
 def task():
     import sympy as sp
     return {"task": sp.latex(current_function, symbol_names={sp.pi: r"\pi"})}
+@app.get("/preview")
+def preview(expr: str):
+    try:
+        parsed = parse_expr(
+            expr.strip(),
+            transformations=transformations,
+            local_dict={
+                "x": x, "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
+                "exp": sp.exp, "sqrt": sp.sqrt, "log": sp.log,
+                "ln": sp.log, "pi": sp.pi, "E": sp.E, "e": sp.E, "Abs": sp.Abs,
+            }
+        )
+        return {"latex": sp.latex(parsed)}
+    except Exception:
+        return {"latex": ""}
 
 
 @app.get("/next")
