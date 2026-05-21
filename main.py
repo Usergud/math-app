@@ -452,7 +452,7 @@ function getRaw() {
 function insertAtCursor(text) {
     display.focus();
     const sel = window.getSelection();
-    if (sel.rangeCount) {
+    if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
         const range = sel.getRangeAt(0);
         range.deleteContents();
         const node = document.createTextNode(text);
@@ -462,13 +462,16 @@ function insertAtCursor(text) {
         sel.removeAllRanges();
         sel.addRange(range);
     } else {
-        display.textContent += text;
+        // Cursor ans Ende setzen und dort einfügen
+        const node = document.createTextNode(text);
+        display.appendChild(node);
+        const range = document.createRange();
+        const sel2 = window.getSelection();
+        range.setStartAfter(node);
+        range.collapse(true);
+        sel2.removeAllRanges();
+        sel2.addRange(range);
     }
-}
-
-function add(val) {
-    insertAtCursor(PRETTY[val] ?? val);
-    updatePreview();
 }
 
 function clearInput() {
