@@ -250,43 +250,20 @@ def home():
             }
             
 
-.math-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 72px);
-    gap: 10px;
 
-    justify-content: center;
-
-    margin: 25px auto;
-
-    max-width: 420px;
-}
-
-.math-grid button {
-
-    height: 60px;
-
-    font-size: 22px;
-
-    border: 1px solid #bbb;
-
-    border-radius: 14px;
-
-    background: white;
-
-    color: #222;
-
-    cursor: pointer;
-
-    transition: 0.15s;
-}
-
-.math-grid button:hover {
-
-    background: #f2f2f2;
-
-    transform: translateY(-1px);
-}
+.kb-wrap { background: #f0f0f5; border-radius: 12px; padding: 12px; max-width: 520px; margin: 20px auto; border: 1px solid #ddd; }
+.kb-section { display: flex; gap: 10px; }
+.kb-col { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.kb-col-label { font-size: 11px; color: #888; text-align: center; margin-bottom: 3px; }
+.kb-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.kb-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.kb-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+.kb-btn { height: 48px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; background: white; color: #222; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.1s; line-height: 1.2; }
+.kb-btn small { font-size: 10px; color: #888; }
+.kb-btn:hover { background: #e8eeff; color: #4a6cf7; border-color: #4a6cf7; }
+.kb-btn.accent { background: #4a6cf7; color: white; border-color: #4a6cf7; }
+.kb-btn.accent:hover { background: #3557d6; }
+.kb-divider { width: 1px; background: #ddd; }
 .action-buttons {
 
     margin-top: 20px;
@@ -376,41 +353,53 @@ def home():
         
         
 
-<div class="math-grid">
+<div class="kb-wrap">
+  <div class="kb-section">
+    <div class="kb-col" style="max-width:195px;">
+      <div class="kb-col-label">Funktionen</div>
+      <div class="kb-grid-2">
+        <div class="kb-btn" onclick="add('**')">xⁿ<small>Potenz</small></div>
+        <div class="kb-btn" onclick="add('sqrt(')">√x<small>Wurzel</small></div>
+        <div class="kb-btn" onclick="add('sin(')">sin</div>
+        <div class="kb-btn" onclick="add('cos(')">cos</div>
+        <div class="kb-btn" onclick="add('tan(')">tan</div>
+        <div class="kb-btn" onclick="add('ln(')">ln</div>
+        <div class="kb-btn" onclick="add('log(')">log</div>
+        <div class="kb-btn" onclick="add('Abs(')">|x|</div>
+        <div class="kb-btn" onclick="add('pi')">π</div>
+        <div class="kb-btn" onclick="add('e')">𝑒</div>
+      </div>
+    </div>
 
-<button onclick="add('7')">7</button>
-<button onclick="add('8')">8</button>
-<button onclick="add('9')">9</button>
-<button onclick="add('+')">+</button>
-<button onclick="add('-')">−</button>
+    <div class="kb-divider"></div>
 
-<button onclick="add('4')">4</button>
-<button onclick="add('5')">5</button>
-<button onclick="add('6')">6</button>
-<button onclick="add('*')">·</button>
-<button onclick="add('/')">/</button>
-
-<button onclick="add('1')">1</button>
-<button onclick="add('2')">2</button>
-<button onclick="add('3')">3</button>
-<button onclick="add('(')">(</button>
-<button onclick="add(')')">)</button>
-
-<button onclick="add('0')">0</button>
-<button onclick="add('.')">.</button>
-<button onclick="add('x')">𝑥</button>
-<button onclick="add('^')">^</button>
-<button onclick="add('sqrt(')">√</button>
-<button onclick="add('pi')">π</button>
-
-<button onclick="add('sin(')">sin</button>
-<button onclick="add('cos(')">cos</button>
-<button onclick="add('tan(')">tan</button>
-<button onclick="add('ln(')">ln</button>
-<button onclick="add('log(')">log</button>
-<button onclick="add('e')">𝑒</button>
-<button onclick="clearInput()">⌫</button>
-
+    <div class="kb-col">
+      <div class="kb-col-label">Zahlen & Operatoren</div>
+      <div class="kb-grid-4">
+        <div class="kb-btn" onclick="add('7')">7</div>
+        <div class="kb-btn" onclick="add('8')">8</div>
+        <div class="kb-btn" onclick="add('9')">9</div>
+        <div class="kb-btn" onclick="add('/')">÷</div>
+        <div class="kb-btn" onclick="add('4')">4</div>
+        <div class="kb-btn" onclick="add('5')">5</div>
+        <div class="kb-btn" onclick="add('6')">6</div>
+        <div class="kb-btn" onclick="add('*')">×</div>
+        <div class="kb-btn" onclick="add('1')">1</div>
+        <div class="kb-btn" onclick="add('2')">2</div>
+        <div class="kb-btn" onclick="add('3')">3</div>
+        <div class="kb-btn" onclick="add('-')">−</div>
+        <div class="kb-btn" onclick="add('0')">0</div>
+        <div class="kb-btn" onclick="add('.')">.</div>
+        <div class="kb-btn" onclick="add('x')" style="font-style:italic">x</div>
+        <div class="kb-btn" onclick="add('+')">+</div>
+      </div>
+      <div class="kb-grid-3" style="margin-top:5px;">
+        <div class="kb-btn" onclick="add('(')">(</div>
+        <div class="kb-btn" onclick="add(')')">)</div>
+        <div class="kb-btn accent" onclick="clearInput()">⌫</div>
+      </div>
+    </div>
+  </div>
 </div>
 
         <div class="action-buttons">
