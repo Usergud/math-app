@@ -356,7 +356,7 @@ def home():
 <style>
   #answer:empty:before { content: attr(placeholder); color: #aaa; }
 </style>
-        <div id="preview"></div>
+        
 
         <br>
         
