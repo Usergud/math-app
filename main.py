@@ -346,7 +346,16 @@ def home():
         <p>Leite ab:</p>
         <div id="task"></div>
 
-        <input id="answer" placeholder="Tippe oder klicke Buttons..." style="width: 340px;">
+        <div id="answer" contenteditable="true" spellcheck="false"
+     placeholder="Tippe oder klicke Buttons..."
+     style="font-size:20px; padding:10px; width:340px; border-radius:8px;
+            border:1px solid #ccc; min-height:44px; display:inline-block;
+            text-align:left; background:white; cursor:text;
+            font-family:'Computer Modern Serif',serif; color:#222;"></div>
+
+<style>
+  #answer:empty:before { content: attr(placeholder); color: #aaa; }
+</style>
         <div id="preview"></div>
 
         <br>
@@ -409,78 +418,139 @@ def home():
         <div id="result"></div>
 
         <script>
-        
-        let answered = false;
+        const display = document.getElementById("answer");
+
+const PRETTY = {
+    'sqrt(':  '√(',
+    'pi':     'π',
+    'e':      '𝑒',
+    'x':      '𝑥',
+    '**':     '^',
+    '*':      '·',
+    '/':      '÷',
+    '-':      '−',
+    'sin(':   'sin(',
+    'cos(':   'cos(',
+    'tan(':   'tan(',
+    'ln(':    'ln(',
+    'log(':   'log(',
+    'Abs(':   '|',
+};
+
+function getRaw() {
+    return display.textContent
+        .replace(/√\(/g,   'sqrt(')
+        .replace(/\^/g,    '**')
+        .replace(/π/g,     'pi')
+        .replace(/𝑒/g,     'e')
+        .replace(/𝑥/g,     'x')
+        .replace(/·/g,     '*')
+        .replace(/÷/g,     '/')
+        .replace(/−/g,     '-');
+}
+
+function insertAtCursor(text) {
+    display.focus();
+    const sel = window.getSelection();
+    if (sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        const node = document.createTextNode(text);
+        range.insertNode(node);
+        range.setStartAfter(node);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else {
+        display.textContent += text;
+    }
+}
+
+function add(val) {
+    insertAtCursor(PRETTY[val] ?? val);
+    updatePreview();
+}
+
+function clearInput() {
+    display.textContent = "";
+    document.getElementById("preview").innerHTML = "";
+    display.focus();
+}
+
+// Auto-ersetze beim manuellen Tippen (z.B. "sqrt(" → "√(")
+const REPLACEMENTS = [
+    [/sqrt\(/g, '√('],
+    [/\*\*/g,   '^'],
+    [/\bpi\b/g, 'π'],
+    [/\be\b/g,  '𝑒'],
+    [/\bx\b/g,  '𝑥'],
+    [/\*/g,     '·'],
+    [/\//g,     '÷'],
+];
+
+display.addEventListener("input", function () {
+    let text = display.textContent;
+    let replaced = text;
+    for (const [from, to] of REPLACEMENTS) replaced = replaced.replace(from, to);
+    if (replaced !== text) {
+        // Cursor ans Ende setzen nach Ersetzung
+        display.textContent = replaced;
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(display);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+    updatePreview();
+});
+
+async function updatePreview() {
+    const raw = getRaw().trim();
+    const preview = document.getElementById("preview");
+    if (!raw) { preview.innerHTML = ""; return; }
+    try {
+        const res = await fetch("/preview?expr=" + encodeURIComponent(raw));
+        const data = await res.json();
+        if (data.latex) {
+            preview.innerHTML = "\\(" + data.latex + "\\)";
+            MathJax.typesetPromise([preview]);
+        }
+    } catch(e) {}
+}
 
 async function loadTask() {
     const res = await fetch("/task");
     const data = await res.json();
     document.getElementById("task").innerHTML = "$$" + data.task + "$$";
-    
     MathJax.typesetPromise();
 }
 
 async function check() {
-    const ans = document.getElementById("answer").value;
+    const ans = getRaw();
     const res = await fetch("/check?answer=" + encodeURIComponent(ans));
     const data = await res.json();
     document.getElementById("result").innerHTML = data.feedback;
-    
     MathJax.typesetPromise();
 }
 
 async function nextTask() {
     await fetch("/next");
-    document.getElementById("answer").value = "";
+    display.textContent = "";
     document.getElementById("result").innerHTML = "";
-    answered = false;
+    document.getElementById("preview").innerHTML = "";
     await loadTask();
 }
 
 async function setCategory(cat) {
     await fetch("/category?name=" + cat);
-    document.getElementById("answer").value = "";
+    display.textContent = "";
     document.getElementById("result").innerHTML = "";
-    answered = false;
+    document.getElementById("preview").innerHTML = "";
     await loadTask();
 }
 
-function add(val) {
-    const input = document.getElementById("answer");
-    if (val === "^") val = "**";
-    input.value += val;
-
-
-
-input.focus();
-}
-
-function clearInput() {
-    const input = document.getElementById("answer");
-    input.value = "";
-    document.getElementById("preview").innerHTML = "";
-    input.focus();
-}
-
 loadTask();
-
-document.getElementById("answer").addEventListener("input", async function () {
-    const val = this.value.trim();
-    const preview = document.getElementById("preview");
-    if (!val) { preview.innerHTML = ""; return; }
-    try {
-        const res = await fetch("/preview?expr=" + encodeURIComponent(val));
-        const data = await res.json();
-        if (data.latex) {
-            preview.innerHTML = "\\(" + data.latex + "\\)";
-            MathJax.typesetPromise([preview]);
-        } else {
-            preview.innerHTML = "";
-        }
-    } catch(e) {
-        preview.innerHTML = "";
-    }
-});
     </script>
     </div> <!-- closes main -->
     </body>
