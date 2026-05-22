@@ -326,6 +326,59 @@ sup.exponent:empty::before {
     color: #bbb;
 }
 
+/* Bruch */
+.frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 2px;
+    font-size: 0.9em;
+}
+.frac-num, .frac-den {
+    display: inline-block;
+    min-width: 20px;
+    padding: 1px 5px;
+    text-align: center;
+    outline: none;
+}
+.frac-num {
+    border-bottom: 2px solid #222;
+}
+.frac-num:empty::before, .frac-den:empty::before {
+    content: '□';
+    color: #bbb;
+}
+
+/* Sidebar Hover-Dropdown */
+#sidebar .ableitung-group {
+    position: relative;
+}
+#sidebar .ableitung-group > button.group-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#sidebar .ableitung-sub {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 6px 0 2px 12px;
+    border-left: 3px solid #4a6cf7;
+}
+#sidebar .ableitung-group:hover .ableitung-sub {
+    display: flex;
+}
+#sidebar .ableitung-sub button {
+    font-size: 15px;
+    padding: 8px 12px;
+    background: #eef1ff;
+    color: #3557d6;
+    margin: 0;
+}
+
         </style>
     </head>
 
@@ -334,29 +387,17 @@ sup.exponent:empty::before {
 
     <h2>📘 Ableitungen</h2>
 
-    <button onclick="setCategory('polynomial')">
-    Polynome
-    </button>
-
-    <button onclick="setCategory('chain')">
-    Kettenregel
-    </button>
-
-    <button onclick="setCategory('product')">
-    Produktregel
-    </button>
-
-    <button onclick="setCategory('quotient')">
-    Quotientenregel
-    </button>
-
-    <button onclick="setCategory('special')">
-    Spezial
-    </button>
-
-    <button onclick="setCategory('extreme')">
-    Extrem
-    </button>
+    <div class="ableitung-group">
+        <button class="group-btn">Ableitungen ▾</button>
+        <div class="ableitung-sub">
+            <button onclick="setCategory('polynomial')">Polynome</button>
+            <button onclick="setCategory('chain')">Kettenregel</button>
+            <button onclick="setCategory('product')">Produktregel</button>
+            <button onclick="setCategory('quotient')">Quotientenregel</button>
+            <button onclick="setCategory('special')">Spezial</button>
+            <button onclick="setCategory('extreme')">Extrem</button>
+        </div>
+    </div>
 
     </div>
 
@@ -410,7 +451,7 @@ sup.exponent:empty::before {
         <div class="kb-btn" onclick="add('7')">7</div>
         <div class="kb-btn" onclick="add('8')">8</div>
         <div class="kb-btn" onclick="add('9')">9</div>
-        <div class="kb-btn" onclick="add('/')">÷</div>
+        <div class="kb-btn" onclick="insertFrac()">a/b<small>Bruch</small></div>
         <div class="kb-btn" onclick="add('4')">4</div>
         <div class="kb-btn" onclick="add('5')">5</div>
         <div class="kb-btn" onclick="add('6')">6</div>
@@ -469,6 +510,13 @@ function getRaw() {
         if (node.nodeName === 'SUP' && node.classList.contains('exponent')) {
             const inner = Array.from(node.childNodes).map(nodeToRaw).join('');
             return '**(' + (inner || '1') + ')';
+        }
+        if (node.classList && node.classList.contains('frac')) {
+            const num = node.querySelector('.frac-num');
+            const den = node.querySelector('.frac-den');
+            const n = num ? Array.from(num.childNodes).map(nodeToRaw).join('') : '';
+            const d = den ? Array.from(den.childNodes).map(nodeToRaw).join('') : '';
+            return '(' + (n || '0') + ')/(' + (d || '1') + ')';
         }
         return Array.from(node.childNodes).map(nodeToRaw).join('');
     }
@@ -557,7 +605,44 @@ function insertPower() {
     updatePreview();
 }
 
-function moveCursor(dir) {
+function insertFrac() {
+    display.focus();
+    const sel = window.getSelection();
+    const range = getOrRestoreRange();
+    range.deleteContents();
+
+    const frac = document.createElement('span');
+    frac.className = 'frac';
+    const num = document.createElement('span');
+    num.className = 'frac-num';
+    const den = document.createElement('span');
+    den.className = 'frac-den';
+    frac.appendChild(num);
+    frac.appendChild(den);
+    range.insertNode(frac);
+
+    // Spacer nach dem Bruch damit Cursor dahinter kann
+    const spacer = document.createTextNode('\u200B');
+    frac.after(spacer);
+
+    // Cursor in Zähler
+    const inner = document.createRange();
+    inner.setStart(num, 0);
+    inner.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(inner);
+    savedRange = inner.cloneRange();
+    updatePreview();
+}
+
+function fracPartAt(sel) {
+    if (!sel.rangeCount) return null;
+    let el = sel.getRangeAt(0).commonAncestorContainer;
+    if (el.nodeType === Node.TEXT_NODE) el = el.parentElement;
+    if (el.classList.contains('frac-num')) return { part: 'num', el };
+    if (el.classList.contains('frac-den')) return { part: 'den', el };
+    return null;
+}
     display.focus();
     const sel = window.getSelection();
     if (savedRange) {
@@ -593,27 +678,72 @@ function add(text) {
     updatePreview();
 }
 
-// Tab / Enter / ArrowRight im Exponenten → Cursor hinter den sup
+// Enter = prüfen (1. Mal) / nächste Aufgabe (2. Mal)
+let enterState = 'check'; // 'check' | 'next'
+document.getElementById("result").addEventListener("DOMSubtreeModified", () => {
+    const r = document.getElementById("result");
+    enterState = (r.innerHTML.trim() !== '') ? 'next' : 'check';
+});
+
 display.addEventListener('keydown', function(e) {
+    // Enter: prüfen oder nächste Aufgabe
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const result = document.getElementById("result");
+        if (result.innerHTML.trim() !== '') {
+            nextTask();
+        } else {
+            check();
+        }
+        return;
+    }
+
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
     const range = sel.getRangeAt(0);
     const anchor = range.commonAncestorContainer;
+
+    // Tab / ArrowRight im Exponenten → raus
     const el = anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : anchor;
     const sup = (el && el.nodeName === 'SUP' && el.classList.contains('exponent')) ? el : null;
-    if (!sup) return;
+    if (sup) {
+        const atEnd = range.collapsed &&
+            range.endOffset === (anchor.nodeType === Node.TEXT_NODE ? anchor.textContent.length : anchor.childNodes.length);
+        if (e.key === 'Tab' || e.key === 'Enter' || (e.key === 'ArrowRight' && atEnd)) {
+            e.preventDefault();
+            const after = document.createRange();
+            after.setStartAfter(sup);
+            after.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(after);
+            savedRange = after.cloneRange();
+        }
+        return;
+    }
 
-    const atEnd = range.collapsed &&
-        range.endOffset === (anchor.nodeType === Node.TEXT_NODE ? anchor.textContent.length : anchor.childNodes.length);
-
-    if (e.key === 'Tab' || e.key === 'Enter' || (e.key === 'ArrowRight' && atEnd)) {
+    // Tab im Bruch: Zähler → Nenner → raus
+    const fracInfo = fracPartAt(sel);
+    if (fracInfo && e.key === 'Tab') {
         e.preventDefault();
-        const after = document.createRange();
-        after.setStartAfter(sup);
-        after.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(after);
-        savedRange = after.cloneRange();
+        const frac = fracInfo.el.closest('.frac');
+        if (fracInfo.part === 'num') {
+            // → Nenner
+            const den = frac.querySelector('.frac-den');
+            const r2 = document.createRange();
+            r2.setStart(den, 0);
+            r2.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r2);
+            savedRange = r2.cloneRange();
+        } else {
+            // → hinter den Bruch
+            const after = document.createRange();
+            after.setStartAfter(frac);
+            after.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(after);
+            savedRange = after.cloneRange();
+        }
     }
 });
 function clearInput() {
@@ -682,6 +812,7 @@ async function check() {
     const res = await fetch("/check?answer=" + encodeURIComponent(ans));
     const data = await res.json();
     document.getElementById("result").innerHTML = data.feedback;
+    enterState = 'next';
     MathJax.typesetPromise();
 }
 
@@ -691,6 +822,7 @@ async function nextTask() {
     savedRange = null;
     document.getElementById("result").innerHTML = "";
     document.getElementById("preview").innerHTML = "";
+    enterState = 'check';
     await loadTask();
 }
 
@@ -700,6 +832,7 @@ async function setCategory(cat) {
     savedRange = null;
     document.getElementById("result").innerHTML = "";
     document.getElementById("preview").innerHTML = "";
+    enterState = 'check';
     await loadTask();
 }
 
