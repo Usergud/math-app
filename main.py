@@ -307,6 +307,25 @@ def home():
     color: #222;
 }
 
+sup.exponent {
+    font-size: 14px;
+    background: #e8eeff;
+    border: 1px solid #4a6cf7;
+    border-radius: 4px;
+    padding: 0 4px;
+    min-width: 14px;
+    display: inline-block;
+    vertical-align: super;
+    outline: none;
+    cursor: text;
+    color: #4a6cf7;
+    font-family: 'Computer Modern Serif', serif;
+}
+sup.exponent:empty::before {
+    content: 'n';
+    color: #bbb;
+}
+
         </style>
     </head>
 
@@ -370,7 +389,7 @@ def home():
     <div class="kb-col" style="max-width:195px;">
       <div class="kb-col-label">Funktionen</div>
       <div class="kb-grid-2">
-        <div class="kb-btn" onclick="add('**')">xⁿ<small>Potenz</small></div>
+        <div class="kb-btn" onclick="insertPower()">xⁿ<small>Potenz</small></div>
         <div class="kb-btn" onclick="add('sqrt(')">√x<small>Wurzel</small></div>
         <div class="kb-btn" onclick="add('sin(')">sin</div>
         <div class="kb-btn" onclick="add('cos(')">cos</div>
@@ -410,6 +429,10 @@ def home():
         <div class="kb-btn" onclick="add(')')">)</div>
         <div class="kb-btn accent" onclick="clearInput()">⌫</div>
       </div>
+      <div style="display:flex; gap:5px; margin-top:5px;">
+        <div class="kb-btn" onclick="moveCursor('left')" style="flex:1">◀<small>links</small></div>
+        <div class="kb-btn" onclick="moveCursor('right')" style="flex:1">▶<small>rechts</small></div>
+      </div>
     </div>
   </div>
 </div>
@@ -441,7 +464,15 @@ const PRETTY = {
 };
 
 function getRaw() {
-    return display.textContent
+    function nodeToRaw(node) {
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+        if (node.nodeName === 'SUP' && node.classList.contains('exponent')) {
+            const inner = Array.from(node.childNodes).map(nodeToRaw).join('');
+            return '**(' + (inner || '1') + ')';
+        }
+        return Array.from(node.childNodes).map(nodeToRaw).join('');
+    }
+    return nodeToRaw(display)
         .replace(/√\(/g,   'sqrt(')
         .replace(/\^/g,    '**')
         .replace(/π/g,     'pi')
@@ -455,9 +486,6 @@ function getRaw() {
 // Letzte Cursor-Position im Eingabefeld merken
 let savedRange = null;
 
-display.addEventListener("focus", () => { savedRange = null; });
-display.addEventListener("keyup",  saveSelection);
-display.addEventListener("mouseup", saveSelection);
 document.addEventListener("selectionchange", () => {
     const sel = window.getSelection();
     if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
@@ -472,27 +500,29 @@ function saveSelection() {
     }
 }
 
-function insertAtCursor(text) {
-    display.focus();
+function getOrRestoreRange() {
     const sel = window.getSelection();
-
-    // Gespeicherte Position wiederherstellen falls Fokus weg war
-    let range;
     if (savedRange) {
         sel.removeAllRanges();
         sel.addRange(savedRange);
-        range = savedRange;
-    } else if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
-        range = sel.getRangeAt(0);
-    } else {
-        // Fallback: ans Ende einfügen
-        range = document.createRange();
-        range.selectNodeContents(display);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
+        return savedRange.cloneRange();
     }
+    if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        return sel.getRangeAt(0).cloneRange();
+    }
+    // Fallback: ans Ende
+    const r = document.createRange();
+    r.selectNodeContents(display);
+    r.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(r);
+    return r;
+}
 
+function insertAtCursor(text) {
+    display.focus();
+    const sel = window.getSelection();
+    const range = getOrRestoreRange();
     range.deleteContents();
     const node = document.createTextNode(text);
     range.insertNode(node);
@@ -503,18 +533,66 @@ function insertAtCursor(text) {
     savedRange = range.cloneRange();
 }
 
+function insertPower() {
+    display.focus();
+    const sel = window.getSelection();
+    const range = getOrRestoreRange();
+    range.deleteContents();
+
+    const sup = document.createElement('sup');
+    sup.className = 'exponent';
+    range.insertNode(sup);
+
+    // Cursor in den sup setzen
+    const inner = document.createRange();
+    inner.setStart(sup, 0);
+    inner.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(inner);
+    savedRange = inner.cloneRange();
+    updatePreview();
+}
+
+function moveCursor(dir) {
+    display.focus();
+    if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+    }
+    window.getSelection().modify('move', dir === 'left' ? 'backward' : 'forward', 'character');
+    saveSelection();
+}
+
 function add(text) {
     const pretty = PRETTY[text] ?? text;
     insertAtCursor(pretty);
     updatePreview();
 }
 
-// Verhindert, dass Klicks auf Buttons den Fokus vom Eingabefeld nehmen
-document.querySelectorAll(".kb-btn").forEach(btn => {
-    btn.addEventListener("mousedown", e => e.preventDefault());
+// Tab / Enter / ArrowRight am Ende des Exponenten → Cursor hinter den sup
+display.addEventListener('keydown', function(e) {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    const anchor = range.commonAncestorContainer;
+    const sup = anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : anchor;
+    if (sup && sup.nodeName === 'SUP' && sup.classList.contains('exponent')) {
+        const atEnd = range.collapsed && range.endOffset === (anchor.textContent || '').length;
+        if (e.key === 'Tab' || e.key === 'Enter' || (e.key === 'ArrowRight' && atEnd)) {
+            e.preventDefault();
+            const after = document.createRange();
+            after.setStartAfter(sup);
+            after.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(after);
+            savedRange = after.cloneRange();
+        }
+    }
 });
 function clearInput() {
-    display.textContent = "";
+    display.innerHTML = "";
+    savedRange = null;
     document.getElementById("preview").innerHTML = "";
     display.focus();
 }
@@ -531,6 +609,11 @@ const REPLACEMENTS = [
 ];
 
 display.addEventListener("input", function () {
+    // Keine Textersetzung wenn Exponenten-Felder vorhanden (würde sup-Elemente zerstören)
+    if (display.querySelector('sup.exponent')) {
+        updatePreview();
+        return;
+    }
     let text = display.textContent;
     let replaced = text;
     for (const [from, to] of REPLACEMENTS) replaced = replaced.replace(from, to);
@@ -578,7 +661,8 @@ async function check() {
 
 async function nextTask() {
     await fetch("/next");
-    display.textContent = "";
+    display.innerHTML = "";
+    savedRange = null;
     document.getElementById("result").innerHTML = "";
     document.getElementById("preview").innerHTML = "";
     await loadTask();
@@ -586,13 +670,19 @@ async function nextTask() {
 
 async function setCategory(cat) {
     await fetch("/category?name=" + cat);
-    display.textContent = "";
+    display.innerHTML = "";
+    savedRange = null;
     document.getElementById("result").innerHTML = "";
     document.getElementById("preview").innerHTML = "";
     await loadTask();
 }
 
 loadTask();
+
+// Verhindert, dass Klicks auf Buttons den Fokus vom Eingabefeld nehmen
+document.querySelectorAll(".kb-btn").forEach(btn => {
+    btn.addEventListener("mousedown", e => e.preventDefault());
+});
     </script>
     </div> <!-- closes main -->
     </body>
