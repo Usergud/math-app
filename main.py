@@ -643,6 +643,7 @@ function fracPartAt(sel) {
     if (el.classList.contains('frac-den')) return { part: 'den', el };
     return null;
 }
+function moveCursor(dir) {
     display.focus();
     const sel = window.getSelection();
     if (savedRange) {
@@ -679,11 +680,7 @@ function add(text) {
 }
 
 // Enter = prüfen (1. Mal) / nächste Aufgabe (2. Mal)
-let enterState = 'check'; // 'check' | 'next'
-document.getElementById("result").addEventListener("DOMSubtreeModified", () => {
-    const r = document.getElementById("result");
-    enterState = (r.innerHTML.trim() !== '') ? 'next' : 'check';
-});
+let enterState = 'check';
 
 display.addEventListener('keydown', function(e) {
     // Enter: prüfen oder nächste Aufgabe
