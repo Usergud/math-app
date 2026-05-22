@@ -543,6 +543,10 @@ function insertPower() {
     sup.className = 'exponent';
     range.insertNode(sup);
 
+    // Unsichtbares Zeichen nach dem sup – Cursor kann dort landen (Klick rechts davon)
+    const spacer = document.createTextNode('\u200B');
+    sup.after(spacer);
+
     // Cursor in den sup setzen
     const inner = document.createRange();
     inner.setStart(sup, 0);
@@ -555,12 +559,31 @@ function insertPower() {
 
 function moveCursor(dir) {
     display.focus();
+    const sel = window.getSelection();
     if (savedRange) {
-        const sel = window.getSelection();
         sel.removeAllRanges();
-        sel.addRange(savedRange);
+        sel.addRange(savedRange.cloneRange());
     }
-    window.getSelection().modify('move', dir === 'left' ? 'backward' : 'forward', 'character');
+
+    if (dir === 'right') {
+        // Wenn im Exponenten: direkt hinter den sup springen
+        if (sel.rangeCount) {
+            const r = sel.getRangeAt(0);
+            const container = r.commonAncestorContainer;
+            const sup = container.nodeType === Node.TEXT_NODE ? container.parentElement : container;
+            if (sup && sup.nodeName === 'SUP' && sup.classList.contains('exponent')) {
+                const after = document.createRange();
+                after.setStartAfter(sup);
+                after.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(after);
+                savedRange = after.cloneRange();
+                return;
+            }
+        }
+    }
+
+    sel.modify('move', dir === 'left' ? 'backward' : 'forward', 'character');
     saveSelection();
 }
 
@@ -570,24 +593,27 @@ function add(text) {
     updatePreview();
 }
 
-// Tab / Enter / ArrowRight am Ende des Exponenten → Cursor hinter den sup
+// Tab / Enter / ArrowRight im Exponenten → Cursor hinter den sup
 display.addEventListener('keydown', function(e) {
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
     const range = sel.getRangeAt(0);
     const anchor = range.commonAncestorContainer;
-    const sup = anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : anchor;
-    if (sup && sup.nodeName === 'SUP' && sup.classList.contains('exponent')) {
-        const atEnd = range.collapsed && range.endOffset === (anchor.textContent || '').length;
-        if (e.key === 'Tab' || e.key === 'Enter' || (e.key === 'ArrowRight' && atEnd)) {
-            e.preventDefault();
-            const after = document.createRange();
-            after.setStartAfter(sup);
-            after.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(after);
-            savedRange = after.cloneRange();
-        }
+    const el = anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : anchor;
+    const sup = (el && el.nodeName === 'SUP' && el.classList.contains('exponent')) ? el : null;
+    if (!sup) return;
+
+    const atEnd = range.collapsed &&
+        range.endOffset === (anchor.nodeType === Node.TEXT_NODE ? anchor.textContent.length : anchor.childNodes.length);
+
+    if (e.key === 'Tab' || e.key === 'Enter' || (e.key === 'ArrowRight' && atEnd)) {
+        e.preventDefault();
+        const after = document.createRange();
+        after.setStartAfter(sup);
+        after.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(after);
+        savedRange = after.cloneRange();
     }
 });
 function clearInput() {
