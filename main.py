@@ -31,8 +31,10 @@ superscripts = {
     "-": "⁻"
 }
 
+
 def to_superscript(num: str):
     return "".join(superscripts.get(c, c) for c in num)
+
 
 def format_expr(expr):
     s = str(expr)
@@ -52,92 +54,93 @@ def format_expr(expr):
     s = s.replace("*", "·")
 
     return s
+
+
 # 👉 Mathe-Eingabe clean machen
 transformations = (
-    standard_transformations +
-    (implicit_multiplication_application, convert_xor)
+        standard_transformations +
+        (implicit_multiplication_application, convert_xor)
 )
 
 categories = {
 
     # 🟢 Basics (11. Klasse)
     "polynomial": [
-        x**2 + 3*x,
-        2*x**3 - x,
-        4*x**2 + 5*x,
-        x**4 - x**2,
-        6*x + 3,
-        x**5 + 2*x**3,
-        (x**2 + x),
-        3*x**4 - x**2 + 2*x,
-        x**6 + x,
-        (2*x + 1)**2
+        x ** 2 + 3 * x,
+        2 * x ** 3 - x,
+        4 * x ** 2 + 5 * x,
+        x ** 4 - x ** 2,
+        6 * x + 3,
+        x ** 5 + 2 * x ** 3,
+        (x ** 2 + x),
+        3 * x ** 4 - x ** 2 + 2 * x,
+        x ** 6 + x,
+        (2 * x + 1) ** 2
     ],
 
     # 🟡 Kettenregel
     "chain": [
-        (x**2 + 1)**3,
-        (x**2 + x)**5,
-        (3*x + 2)**4,
-        (x**2 - 1)**2,
-        (x + 5)**6,
-        sp.sqrt(x**2 + 1),
-        (x**2 + 4)**(3/2),
-        (2*x**2 + 3*x + 1)**3,
-        (x**3 + 1)**2,
+        (x ** 2 + 1) ** 3,
+        (x ** 2 + x) ** 5,
+        (3 * x + 2) ** 4,
+        (x ** 2 - 1) ** 2,
+        (x + 5) ** 6,
+        sp.sqrt(x ** 2 + 1),
+        (x ** 2 + 4) ** (3 / 2),
+        (2 * x ** 2 + 3 * x + 1) ** 3,
+        (x ** 3 + 1) ** 2,
     ],
 
     # 🔵 Produktregel (auch gemischt mit Wurzeln)
     "product": [
-        (x**2 + 1)*(x**3 - x),
-        x*(x**2 + 3)**4,
-        x**2 * (x + 1)**2,
-        (x + 2)*(x**2 + 1),
-        x * sp.sqrt(x**2 + 1),
-        (x**2 + 1) * sp.sqrt(x + 1),
-        (x + 1)*(x**2 + 3)**2,
-        x*(x**2 + 1)*(x + 2),
+        (x ** 2 + 1) * (x ** 3 - x),
+        x * (x ** 2 + 3) ** 4,
+        x ** 2 * (x + 1) ** 2,
+        (x + 2) * (x ** 2 + 1),
+        x * sp.sqrt(x ** 2 + 1),
+        (x ** 2 + 1) * sp.sqrt(x + 1),
+        (x + 1) * (x ** 2 + 3) ** 2,
+        x * (x ** 2 + 1) * (x + 2),
     ],
 
     # 🟣 Quotientenregel (auch mit trig / Wurzeln)
     "quotient": [
-        (x**3 + 2*x)/(x**2 + 1),
-        (x + 1)/(x**3 + 1),
-        (x**2 + 1)/(x + 2),
-        (x**3 - x)/(x + 1),
-        (2*x + 3)/(x**2 + 4),
-        sp.sin(x)/(x + 1),
-        sp.cos(x)/(x**2 + 1),
-        sp.sqrt(x)/(x + 1),
+        (x ** 3 + 2 * x) / (x ** 2 + 1),
+        (x + 1) / (x ** 3 + 1),
+        (x ** 2 + 1) / (x + 2),
+        (x ** 3 - x) / (x + 1),
+        (2 * x + 3) / (x ** 2 + 4),
+        sp.sin(x) / (x + 1),
+        sp.cos(x) / (x ** 2 + 1),
+        sp.sqrt(x) / (x + 1),
     ],
 
     # 🟠 Mixed (Trig + Exp + Produkt + Kette)
     "special": [
-        x**2 * sp.sin(x),
+        x ** 2 * sp.sin(x),
         x * sp.cos(x),
         sp.exp(x) * x,
         sp.exp(x) * sp.sin(x),
-        (x**2 + 1) * sp.cos(x),
+        (x ** 2 + 1) * sp.cos(x),
         sp.sin(x) * sp.exp(x),
         x * sp.exp(x) * sp.cos(x),
     ],
 
     # 🔴 EXTREM (Abi+ – alles gemischt, aber sauber vereinfachbar)
     "extreme": [
-        (x**2 + 1) * sp.sin(x),
-        (x**2 + 1) * sp.cos(x),
-        x * (x**2 + 1) * sp.sin(x),
-        sp.exp(x) * (x**2 + 1) * sp.cos(x),
-        (x**2 + 1)**2 * sp.sin(x),
-        (x + 1) * sp.sqrt(x**2 + 1) * sp.cos(x),
-        (x**2 + 1) / (x + 1) * sp.sin(x),
-        x * sp.sqrt(x**2 + 1) * sp.exp(x),
-        (x**2 + 1)**(3/2) * sp.cos(x),
-        x * (x**2 + 1) * sp.exp(x),
+        (x ** 2 + 1) * sp.sin(x),
+        (x ** 2 + 1) * sp.cos(x),
+        x * (x ** 2 + 1) * sp.sin(x),
+        sp.exp(x) * (x ** 2 + 1) * sp.cos(x),
+        (x ** 2 + 1) ** 2 * sp.sin(x),
+        (x + 1) * sp.sqrt(x ** 2 + 1) * sp.cos(x),
+        (x ** 2 + 1) / (x + 1) * sp.sin(x),
+        x * sp.sqrt(x ** 2 + 1) * sp.exp(x),
+        (x ** 2 + 1) ** (3 / 2) * sp.cos(x),
+        x * (x ** 2 + 1) * sp.exp(x),
     ]
 }
 current_category = "polynomial"
-
 
 current_function = None
 correct_answer = None
@@ -248,7 +251,7 @@ def home():
                 font-size: 22px;
                 margin-top: 20px;
             }
-            
+
 
 
 .kb-wrap { background: #f0f0f5; border-radius: 12px; padding: 12px; max-width: 520px; margin: 20px auto; border: 1px solid #ddd; }
@@ -306,7 +309,7 @@ def home():
 
         </style>
     </head>
-    
+
     <body>
         <div id="sidebar">
 
@@ -341,7 +344,7 @@ def home():
     <div id="main">
 
         <h1>📘 Mathe Trainer</h1>
-        
+
 
         <p>Leite ab:</p>
         <div id="task"></div>
@@ -356,11 +359,11 @@ def home():
 <style>
   #answer:empty:before { content: attr(placeholder); color: #aaa; }
 </style>
-        
+
 
         <br>
-        
-        
+
+
 
 <div class="kb-wrap">
   <div class="kb-section">
@@ -449,37 +452,67 @@ function getRaw() {
         .replace(/−/g,     '-');
 }
 
-function insertAtCursor(text) {
-    display.focus();
+// Letzte Cursor-Position im Eingabefeld merken
+let savedRange = null;
+
+display.addEventListener("focus", () => { savedRange = null; });
+display.addEventListener("keyup",  saveSelection);
+display.addEventListener("mouseup", saveSelection);
+document.addEventListener("selectionchange", () => {
     const sel = window.getSelection();
     if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        const node = document.createTextNode(text);
-        range.insertNode(node);
-        range.setStartAfter(node);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } else {
-        // Cursor ans Ende setzen und dort einfügen
-        const node = document.createTextNode(text);
-        display.appendChild(node);
-        const range = document.createRange();
-        const sel2 = window.getSelection();
-        range.setStartAfter(node);
-        range.collapse(true);
-        sel2.removeAllRanges();
-        sel2.addRange(range);
+        savedRange = sel.getRangeAt(0).cloneRange();
+    }
+});
+
+function saveSelection() {
+    const sel = window.getSelection();
+    if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        savedRange = sel.getRangeAt(0).cloneRange();
     }
 }
 
-// Diese Funktion direkt nach der PRETTY-Definition einfügen:
+function insertAtCursor(text) {
+    display.focus();
+    const sel = window.getSelection();
+
+    // Gespeicherte Position wiederherstellen falls Fokus weg war
+    let range;
+    if (savedRange) {
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+        range = savedRange;
+    } else if (sel.rangeCount && display.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        range = sel.getRangeAt(0);
+    } else {
+        // Fallback: ans Ende einfügen
+        range = document.createRange();
+        range.selectNodeContents(display);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    range.deleteContents();
+    const node = document.createTextNode(text);
+    range.insertNode(node);
+    range.setStartAfter(node);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    savedRange = range.cloneRange();
+}
+
 function add(text) {
     const pretty = PRETTY[text] ?? text;
     insertAtCursor(pretty);
     updatePreview();
 }
+
+// Verhindert, dass Klicks auf Buttons den Fokus vom Eingabefeld nehmen
+document.querySelectorAll(".kb-btn").forEach(btn => {
+    btn.addEventListener("mousedown", e => e.preventDefault());
+});
 function clearInput() {
     display.textContent = "";
     document.getElementById("preview").innerHTML = "";
@@ -571,6 +604,8 @@ loadTask();
 def task():
     import sympy as sp
     return {"task": sp.latex(current_function, symbol_names={sp.pi: r"\pi"})}
+
+
 @app.get("/preview")
 def preview(expr: str):
     try:
@@ -592,9 +627,10 @@ def preview(expr: str):
 def next_task():
     new_task()
     return {"ok": True}
+
+
 @app.get("/category")
 def set_category(name: str):
-
     global current_category
 
     if name in categories:
@@ -604,6 +640,7 @@ def set_category(name: str):
     new_task()
 
     return {"ok": True}
+
 
 def same_math(a, b):
     d = a - b
@@ -621,8 +658,6 @@ def same_math(a, b):
         except Exception:
             pass
     return False
-
-
 
     base = sp.simplify(expr)
 
