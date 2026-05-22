@@ -474,6 +474,12 @@ function insertAtCursor(text) {
     }
 }
 
+// Diese Funktion direkt nach der PRETTY-Definition einfügen:
+function add(text) {
+    const pretty = PRETTY[text] ?? text;
+    insertAtCursor(pretty);
+    updatePreview();
+}
 function clearInput() {
     display.textContent = "";
     document.getElementById("preview").innerHTML = "";
