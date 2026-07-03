@@ -1,1 +1,1 @@
-erstelle mir einen Python Code mit einer KI deren gesammelte Daten gespeichert werden und die in einer Simulation ist mit wänden und gegencejne wand fahren ist schlecht und wenn der Akku leer ist muß es zu einer Ladestation navigieren die auch irgendwie in seinem Blickfeld ist. der Agent kann nur nach links rechts vorne hinten gehen und mehr nach vorne schauen und er soll durch mehrere tausend Simulationen pro Sekunden lernen was für und was schlecht ist und dann macht er nur noch das
+
